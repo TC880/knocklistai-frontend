@@ -240,6 +240,7 @@ function RepDashboard({repId,repName,onLogout}) {
   const [customGen, setCustomGen]= useState("");
   const [tiers,     setTiers]    = useState(defaultTiers());
   const [quickFilter,setQuickFilter]=useState("all");
+  const [preserveOrder,setPreserveOrder]=useState(false);
   const [label,     setLabel]    = useState("");
   const [genResult, setGenResult]= useState(null);
   const [genErr,    setGenErr]   = useState("");
@@ -311,6 +312,7 @@ function RepDashboard({repId,repName,onLogout}) {
         t1_months:3,t2_months:6,t3_months:9,t4_months:12,
         tier_config:tierConfig,date_from:dfrom,date_to:dto,
         label:label||`${repName} — ${new Date().toLocaleDateString()}`,
+        preserve_order:String(preserveOrder),
       });
       setGenResult(d);
     } catch(e){setGenErr(e.message);}
@@ -598,6 +600,30 @@ function RepDashboard({repId,repName,onLogout}) {
                   <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
                     borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
                     ✓ Route will only include homes from this window
+                  </div>
+                )}
+              </div>
+
+              {/* Route order toggle */}
+              <div style={card}>
+                <span style={lbl}>🗺 Route Order</span>
+                <p style={{fontSize:12,color:"#4A6075",marginBottom:12}}>
+                  If your data was already sorted in a specific order (like an EZ Route export), keep it.
+                  Otherwise let KnockListAI build the most efficient route.
+                </p>
+                <div style={{display:"flex",background:"#0A1118",borderRadius:10,padding:4,
+                  border:"1px solid #1E2D3D"}}>
+                  {[[false,"⚡ Auto-Optimize (recommended)"],[true,"📋 Keep Uploaded Order"]].map(([val,lbl2])=>(
+                    <button key={String(val)} onClick={()=>setPreserveOrder(val)}
+                      style={{flex:1,padding:"12px 8px",background:preserveOrder===val?"#1E2D3D":"transparent",
+                        border:"none",borderRadius:8,color:preserveOrder===val?"white":"#4A6075",
+                        fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"center"}}>{lbl2}</button>
+                  ))}
+                </div>
+                {preserveOrder&&(
+                  <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
+                    borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
+                    ✓ Stops will follow the order from your uploaded file
                   </div>
                 )}
               </div>
@@ -1218,6 +1244,11 @@ function AdminDashboard({onLogout}) {
   useEffect(()=>{load();const i=setInterval(load,10000);return()=>clearInterval(i);},[]);
 
   const fulfill=async(reqId,file)=>{
+    // Detect .numbers files and show helpful message
+    if(file.name.toLowerCase().endsWith('.numbers')){
+      setMsgs(m=>({...m,[reqId]:"✗ Apple Numbers files can't be uploaded directly. Open the file in Numbers → File → Export To → CSV, then upload the CSV."}));
+      return;
+    }
     setUploading(reqId);
     const fd=new FormData();fd.append("file",file);
     try {
