@@ -875,7 +875,7 @@ Or mix: 33596, Brandon, Valrico`}
         {/* ── DRIVE ── */}
         {tab==="drive" && (
           <DriveMode repId={repId} driveRoute={driveRoute} setDriveRoute={setDriveRoute}
-            routes={routes} loadDriveRoute={loadDriveRoute}
+            routes={routes} loadRoutes={loadRoutes} loadDriveRoute={loadDriveRoute}
             tiers={tiers} onBack={()=>setTab("generate")}/>
         )}
       </div>
@@ -910,7 +910,7 @@ Or mix: 33596, Brandon, Valrico`}
 // ══════════════════════════════════════════════════════════════════════
 // DRIVE MODE
 // ══════════════════════════════════════════════════════════════════════
-function DriveMode({repId,driveRoute,setDriveRoute,routes,loadDriveRoute,tiers,onBack}) {
+function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRoute,tiers,onBack}) {
   const [view,      setView]      = useState(driveRoute?"current":"list");
   const [outcome,   setOutcome]   = useState("");
   const [note,      setNote]      = useState("");
@@ -923,6 +923,10 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadDriveRoute,tiers,o
   const [editData,  setEditData]  = useState({});
   const [saving,    setSaving]    = useState(false);
   const [stops,     setStops]     = useState([]);
+  const [showHidden,setShowHidden]= useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [rowBusy,   setRowBusy]   = useState(null);
 
   const setNav=(p)=>{setNavPref(p);try{localStorage.setItem("navPref",p);}catch{}};
 
@@ -982,33 +986,78 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadDriveRoute,tiers,o
   const inp={width:"100%",background:"#080E14",border:"1px solid #2A3D50",borderRadius:10,
     color:"white",padding:"12px 14px",fontSize:15,outline:"none",boxSizing:"border-box"};
 
-  if (!route) return (
+  const saveRename = async (id) => {
+    const name=editLabel.trim();
+    if(!name){ setEditingId(null); return; }
+    setRowBusy(id);
+    try{ await post(`/route/${id}/rename`,{label:name}); await loadRoutes(); }catch{}
+    setRowBusy(null); setEditingId(null);
+  };
+  const toggleHide = async (r) => {
+    setRowBusy(r.id);
+    try{ await post(`/route/${r.id}/hide`,{hidden:String(!r.hidden)}); await loadRoutes(); }catch{}
+    setRowBusy(null);
+  };
+
+  if (!route) {
+    const visibleRoutes = routes.filter(r=> showHidden ? true : !r.hidden);
+    const hiddenCount = routes.filter(r=>r.hidden).length;
+    return (
     <div style={{display:"grid",gap:12}}>
       <div style={{display:"flex",alignItems:"center",gap:12}}>
         <button onClick={onBack} style={{background:"#1E2D3D",border:"none",borderRadius:8,
           color:"#7A8FA6",fontSize:13,padding:"8px 14px",cursor:"pointer"}}>← Back</button>
         <h2 style={{fontSize:20,fontWeight:800,margin:0}}>Drive Mode</h2>
       </div>
-      {routes.length===0?(
+      {hiddenCount>0&&(
+        <button onClick={()=>setShowHidden(h=>!h)}
+          style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,
+            color:"#7A8FA6",fontSize:12,fontWeight:600,padding:"6px 12px",cursor:"pointer",justifySelf:"start"}}>
+          {showHidden?`Hide ${hiddenCount} hidden`:`Show ${hiddenCount} hidden`}
+        </button>
+      )}
+      {visibleRoutes.length===0?(
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,
           padding:40,textAlign:"center",color:"#4A6075"}}>
-          Generate a list first, then come back to drive it.
+          {routes.length===0?"Generate a list first, then come back to drive it.":"No routes to show."}
         </div>
-      ):routes.map(r=>(
-        <div key={r.id} onClick={()=>loadDriveRoute(r.id)}
+      ):visibleRoutes.map(r=>(
+        <div key={r.id}
           style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
-            padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
-          <div style={{flex:1}}>
-            <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-            <div style={{fontSize:12,color:"#4A6075",marginTop:2}}>
-              {r.completed}/{r.total} done · {r.pct}% · {r.created}
+            padding:"16px",display:"flex",alignItems:"center",gap:10,opacity:r.hidden?0.55:1}}>
+          {editingId===r.id?(
+            <div style={{flex:1,display:"flex",gap:8,alignItems:"center"}}>
+              <input value={editLabel} onChange={e=>setEditLabel(e.target.value)} autoFocus
+                onKeyDown={e=>{if(e.key==="Enter")saveRename(r.id);if(e.key==="Escape")setEditingId(null);}}
+                style={{...inp,padding:"8px 10px",fontSize:14}}/>
+              <button onClick={()=>saveRename(r.id)} disabled={rowBusy===r.id}
+                style={{background:"#27AE60",border:"none",borderRadius:8,color:"white",
+                  fontWeight:700,fontSize:13,padding:"8px 12px",cursor:"pointer"}}>Save</button>
+              <button onClick={()=>setEditingId(null)}
+                style={{background:"#1E2D3D",border:"none",borderRadius:8,color:"#7A8FA6",
+                  fontSize:13,padding:"8px 10px",cursor:"pointer"}}>✕</button>
             </div>
-          </div>
-          <span style={{color:"#27AE60",fontWeight:700}}>Go →</span>
+          ):(<>
+            <div style={{flex:1,cursor:"pointer"}} onClick={()=>loadDriveRoute(r.id)}>
+              <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
+              <div style={{fontSize:12,color:"#4A6075",marginTop:2}}>
+                {r.completed}/{r.total} done · {r.pct}% · {r.created}
+              </div>
+            </div>
+            <button onClick={()=>{setEditingId(r.id);setEditLabel(r.label);}} title="Rename"
+              style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
+                padding:"6px",cursor:"pointer"}}>✏️</button>
+            <button onClick={()=>toggleHide(r)} disabled={rowBusy===r.id} title={r.hidden?"Unhide":"Hide"}
+              style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
+                padding:"6px",cursor:"pointer"}}>{r.hidden?"👁":"🙈"}</button>
+            <span onClick={()=>loadDriveRoute(r.id)}
+              style={{color:"#27AE60",fontWeight:700,cursor:"pointer"}}>Go →</span>
+          </>)}
         </div>
       ))}
     </div>
-  );
+    );
+  }
 
   const VIEWS=[["current","Current"],["list","All Stops"],["map","🗺 Map"],["history","History"]];
 
