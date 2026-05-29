@@ -1119,11 +1119,20 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadDriveRoute,tiers,o
                       textDecoration:isDone?"line-through":"none",opacity:isDone?0.7:1}}>
                       {s.address}
                     </div>
-                    <div style={{fontSize:11,color:"#4A6075"}}>{s.owner}</div>
+                    <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+                      <span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>
+                      <span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                      <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {s.sale_date}</span>
+                      {isDone&&s.outcome&&<>
+                        <span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                        <span style={{fontSize:11,fontWeight:700,
+                          color:OUTCOMES.find(o=>o.key===s.outcome)?.color||"#27AE60"}}>
+                          {s.outcome}
+                        </span>
+                      </>}
+                    </div>
                   </div>
-                  {isDone&&<span style={{fontSize:11,color:"#27AE60",fontWeight:700,flexShrink:0}}>
-                    {s.outcome||"✓"} ✏️
-                  </span>}
+                  {isDone&&<span style={{fontSize:11,color:"#27AE60",fontWeight:700,flexShrink:0}}>✏️</span>}
                   {isCurrent&&<span style={{fontSize:11,color:"#27AE60",fontWeight:700}}>← NOW</span>}
                 </div>
                 {isDone&&s.phone&&<div style={{fontSize:11,color:"#4A6075",marginTop:4,paddingLeft:52}}>📱 {s.phone}</div>}
