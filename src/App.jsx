@@ -331,7 +331,7 @@ function RepDashboard({repId,repName,onLogout}) {
   const [genCount,  setGenCount] = useState(100);
   const [customGen, setCustomGen]= useState("");
   const [tiers,     setTiers]    = useState(defaultTiers());
-  const [quickFilter,setQuickFilter]=useState("all");
+  const [quickFilters,setQuickFilters]=useState([]);
   const [preserveOrder,setPreserveOrder]=useState(false);
   const [label,     setLabel]    = useState("");
   const [genResult, setGenResult]= useState(null);
@@ -385,24 +385,22 @@ function RepDashboard({repId,repName,onLogout}) {
     const tierConfig=JSON.stringify(activeTiers.map(t=>({
       key:t.key,name:t.name,color:t.color,bg:t.bg,range:t.range
     })));
-    // Apply quick filter to date range
-    let dfrom="", dto="";
-    if(quickFilter!=="all"){
-      const now=new Date();
-      const m={last1:1,last3:3,last6:6,last9:9}[quickFilter]||0;
-      if(m){
-        const from=new Date(now.getFullYear(),now.getMonth()-m,1);
-        dfrom=`${from.getFullYear()}-${String(from.getMonth()+1).padStart(2,'0')}-01`;
-        dto=now.toISOString().split("T")[0];
-      }
-    }
+    // Apply selected move-in windows (multi-select). Empty = all dates.
+    // Each window is a band [monthsAgoRecent, monthsAgoOld].
+    const WIN={last1:[0,1],last3:[1,3],last6:[3,6],last9:[6,9]};
+    const ymd=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const monthsAgo=(n)=>{const d=new Date();d.setMonth(d.getMonth()-n);return d;};
+    const dateWindows=quickFilters.filter(k=>WIN[k]).map(k=>{
+      const [a,b]=WIN[k];
+      return {from:ymd(monthsAgo(b)),to:ymd(monthsAgo(a))};
+    });
     setLoading(true);setGenErr("");setGenResult(null);
     try {
       const d=await post("/rep/generate",{
         request_id:selReq.id,home_base:homeBase||selReq.filters?.start_address||"",
         price_max:800000,home_count:cnt,
         t1_months:3,t2_months:6,t3_months:9,t4_months:12,
-        tier_config:tierConfig,date_from:dfrom,date_to:dto,
+        tier_config:tierConfig,date_windows:JSON.stringify(dateWindows),
         label:label||`${repName} — ${new Date().toLocaleDateString()}`,
         preserve_order:String(preserveOrder),
       });
@@ -686,18 +684,24 @@ Or mix: 33596, Brandon, Valrico`}
                 </p>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   {[["all","All dates"],["last1","Last month"],["last3","1–3 months"],
-                    ["last6","3–6 months"],["last9","6–9 months"]].map(([k,l])=>(
-                    <button key={k} onClick={()=>setQuickFilter(k)}
+                    ["last6","3–6 months"],["last9","6–9 months"]].map(([k,l])=>{
+                    const active = k==="all" ? quickFilters.length===0 : quickFilters.includes(k);
+                    return (
+                    <button key={k} onClick={()=>{
+                        if(k==="all"){ setQuickFilters([]); }
+                        else { setQuickFilters(prev=> prev.includes(k) ? prev.filter(x=>x!==k) : [...prev,k]); }
+                      }}
                       style={{padding:"10px 14px",borderRadius:20,fontSize:13,fontWeight:600,cursor:"pointer",
-                        border:`2px solid ${quickFilter===k?"#C0392B":"#2A3D50"}`,
-                        background:quickFilter===k?"#2B0A0A":"transparent",
-                        color:quickFilter===k?"#C0392B":"#7A8FA6"}}>{l}</button>
-                  ))}
+                        border:`2px solid ${active?"#C0392B":"#2A3D50"}`,
+                        background:active?"#2B0A0A":"transparent",
+                        color:active?"#C0392B":"#7A8FA6"}}>{l}</button>
+                    );
+                  })}
                 </div>
-                {quickFilter!=="all"&&(
+                {quickFilters.length>0&&(
                   <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
                     borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
-                    ✓ Route will only include homes from this window
+                    ✓ Route will only include homes from: {quickFilters.map(k=>({last1:"Last month",last3:"1–3 months",last6:"3–6 months",last9:"6–9 months"}[k])).join(", ")}
                   </div>
                 )}
               </div>
@@ -1573,4 +1577,4 @@ function AdminDashboard({onLogout}) {
       </div>
     </div>
   );
-}    
+}
