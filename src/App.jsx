@@ -464,10 +464,10 @@ function RepDashboard({repId,repName,onLogout}) {
             <div style={card}>
               <span style={lbl}>Location</span>
               <textarea value={zips} onChange={e=>setZips(e.target.value)}
-                placeholder={"ZIP codes: 33596, 33511
+                placeholder={`ZIP codes: 33596, 33511
 Towns: Valrico, Brandon, Riverview
 Counties: Hillsborough County
-Or mix: 33596, Brandon, Valrico"}
+Or mix: 33596, Brandon, Valrico`}
                 style={{...inp,height:100,resize:"none",lineHeight:1.6,fontFamily:"inherit"}}/>
               <p style={{margin:"6px 0 0",fontSize:12,color:"#4A6075"}}>
                 Enter any combination of ZIP codes, city names, or county names
