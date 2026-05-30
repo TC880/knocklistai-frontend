@@ -461,6 +461,8 @@ function RepDashboard({repId,repName,onLogout}) {
       const [a,b]=WIN[k];
       return {from:ymd(monthsAgo(b)),to:ymd(monthsAgo(a))};
     });
+    const WINLABEL={last1:"Last month",last3:"1–3 months",last6:"3–6 months",last9:"6–9 months"};
+    const moveWindows=quickFilters.filter(k=>WINLABEL[k]).map(k=>WINLABEL[k]);
     setLoading(true);setGenErr("");setGenResult(null);
     try {
       const d=await post("/rep/generate",{
@@ -468,6 +470,7 @@ function RepDashboard({repId,repName,onLogout}) {
         price_max:800000,home_count:cnt,
         t1_months:3,t2_months:6,t3_months:9,t4_months:12,
         tier_config:tierConfig,date_windows:JSON.stringify(dateWindows),
+        move_windows:JSON.stringify(moveWindows),
         label:label||`${repName} — ${new Date().toLocaleDateString()}`,
         preserve_order:String(preserveOrder),
       });
@@ -1192,6 +1195,9 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
         </div>
       ):visibleRoutes.map(r=>{
         const tcfg=Array.isArray(r.tier_config)?r.tier_config:[];
+        const hasMw=Array.isArray(r.move_windows);
+        const winLabels=hasMw?(r.move_windows.length?r.move_windows:["All move-in dates"]):[];
+        const showCount=hasMw?winLabels.length:tcfg.length;
         return (
         <div key={r.id}
           style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
@@ -1211,10 +1217,17 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           ):(<>
             <div style={{flex:1,cursor:"pointer",minWidth:0}} onClick={()=>loadDriveRoute(r.id)}>
               <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:tcfg.length?7:0}}>
+              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:showCount?7:0}}>
                 {r.completed}/{r.total} done · {r.pct}%{r.created_at?` · ${r.created_at}`:""}
               </div>
-              {tcfg.length>0&&(
+              {hasMw ? (winLabels.length>0&&(
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {winLabels.map((w,i)=>(
+                    <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
+                      border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>📅 {w}</span>
+                  ))}
+                </div>
+              )) : (tcfg.length>0&&(
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                   {tcfg.map((t,i)=>(
                     <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,
@@ -1224,7 +1237,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                     </span>
                   ))}
                 </div>
-              )}
+              ))}
             </div>
             <button onClick={()=>{setEditingId(r.id);setEditLabel(r.label);}} title="Rename"
               style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
