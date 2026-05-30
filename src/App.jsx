@@ -377,7 +377,7 @@ function RepDashboard({repId,repName,onLogout}) {
   const [customGen, setCustomGen]= useState("");
   const [tiers,     setTiers]    = useState(defaultTiers());
   const [quickFilters,setQuickFilters]=useState([]);
-  const [preserveOrder,setPreserveOrder]=useState(false);
+  const [preserveOrder,setPreserveOrder]=useState(true);
   const [label,     setLabel]    = useState("");
   const [genResult, setGenResult]= useState(null);
   const [genErr,    setGenErr]   = useState("");
@@ -824,26 +824,12 @@ Or mix: 33596, Brandon, Valrico`}
               {/* Route order toggle */}
               <div style={card}>
                 <span style={lbl}>🗺 Route Order</span>
-                <p style={{fontSize:12,color:"#4A6075",marginBottom:12}}>
-                  If your data was already sorted in a specific order (like an EZ Route export), keep it.
-                  Otherwise let KnockListAI build the most efficient route.
-                </p>
-                <div style={{display:"flex",background:"#0A1118",borderRadius:10,padding:4,
-                  border:"1px solid #1E2D3D"}}>
-                  {[[false,"⚡ Auto-Optimize (recommended)"],[true,"📋 Keep Uploaded Order"]].map(([val,lbl2])=>(
-                    <button key={String(val)} onClick={()=>setPreserveOrder(val)}
-                      style={{flex:1,padding:"12px 8px",background:preserveOrder===val?"#1E2D3D":"transparent",
-                        border:"none",borderRadius:8,color:preserveOrder===val?"white":"#4A6075",
-                        fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"center"}}>{lbl2}</button>
-                  ))}
+                <div style={{marginTop:6,background:"#0D2B1A",border:"1px solid #1A3A2A",
+                  borderRadius:8,padding:"10px 12px",fontSize:13,color:"#27AE60"}}>
+                  ✓ Stops follow the order from your uploaded file
                 </div>
-                {preserveOrder&&(
-                  <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
-                    borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
-                    ✓ Stops will follow the order from your uploaded file
-                  </div>
-                )}
               </div>
+
 
               <div style={card}>
                 <span style={lbl}>List Name</span>
@@ -1177,6 +1163,14 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     setRowBusy(null);
   };
 
+  const deleteRoute = async (r) => {
+    if(!window.confirm(`Delete "${r.label}"? This permanently removes the route and all its stops. This can't be undone.`)) return;
+    setRowBusy(r.id);
+    try{ await post(`/route/${r.id}/delete`,{}); await loadRoutes(); }
+    catch(e){ alert("Couldn't delete: "+e.message); }
+    setRowBusy(null);
+  };
+
   if (!route) {
     const visibleRoutes = routes.filter(r=> showHidden ? true : !r.hidden);
     const hiddenCount = routes.filter(r=>r.hidden).length;
@@ -1257,6 +1251,9 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
             <button onClick={()=>toggleHide(r)} disabled={rowBusy===r.id} title={r.hidden?"Unhide":"Hide"}
               style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
                 padding:"6px",cursor:"pointer"}}>{r.hidden?"👁":"🙈"}</button>
+            <button onClick={()=>deleteRoute(r)} disabled={rowBusy===r.id} title="Delete"
+              style={{background:"transparent",border:"none",color:"#C0392B",fontSize:15,
+                padding:"6px",cursor:"pointer"}}>🗑</button>
             <span onClick={()=>loadDriveRoute(r.id)}
               style={{color:"#27AE60",fontWeight:700,cursor:"pointer"}}>Go →</span>
           </>)}
