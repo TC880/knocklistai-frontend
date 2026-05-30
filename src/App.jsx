@@ -79,6 +79,9 @@ const navUrl = (addr, pref) => pref==="waze"
   : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}&travelmode=driving`;
 
 // ── Calendar helpers (Appointment Set) ────────────────────────────────
+const _MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtMD=(iso)=>{ if(!iso) return ""; const p=String(iso).split("-"); if(p.length<3) return String(iso); return `${_MON[(+p[1])-1]||"?"} ${+p[2]}`; };
+const fmtRange=(from,to)=>{ if(!from||!to) return ""; const yr=String(to).split("-")[0]; return `${fmtMD(from)} – ${fmtMD(to)}, ${yr}`; };
 const _p2 = (n) => String(n).padStart(2,"0");
 const _icsStamp = (d) =>
   d.getUTCFullYear()+_p2(d.getUTCMonth()+1)+_p2(d.getUTCDate())+"T"+
@@ -462,7 +465,10 @@ function RepDashboard({repId,repName,onLogout}) {
       return {from:ymd(monthsAgo(b)),to:ymd(monthsAgo(a))};
     });
     const WINLABEL={last1:"Last month",last3:"1–3 months",last6:"3–6 months",last9:"6–9 months"};
-    const moveWindows=quickFilters.filter(k=>WINLABEL[k]).map(k=>WINLABEL[k]);
+    const moveWindows=quickFilters.filter(k=>WIN[k]).map(k=>{
+      const [a,b]=WIN[k];
+      return {label:WINLABEL[k]||k, from:ymd(monthsAgo(b)), to:ymd(monthsAgo(a))};
+    });
     setLoading(true);setGenErr("");setGenResult(null);
     try {
       const d=await post("/rep/generate",{
@@ -1222,10 +1228,16 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               </div>
               {hasMw ? (winLabels.length>0&&(
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {winLabels.map((w,i)=>(
-                    <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
-                      border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>📅 {w}</span>
-                  ))}
+                  {winLabels.map((w,i)=>{
+                    const label=typeof w==="string"?w:(w.label||"");
+                    const range=(w&&typeof w==="object")?fmtRange(w.from,w.to):"";
+                    return (
+                      <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
+                        border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                        📅 {label}{range?` · ${range}`:""}
+                      </span>
+                    );
+                  })}
                 </div>
               )) : (tcfg.length>0&&(
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
