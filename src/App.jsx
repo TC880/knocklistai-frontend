@@ -372,6 +372,9 @@ function RepDashboard({repId,repName,onLogout}) {
 
   // Generate form
   const [selReq,    setSelReq]   = useState(null);
+  const [editingReqId, setEditingReqId] = useState(null);
+  const [editReqName,  setEditReqName]  = useState("");
+  const [reqBusy,      setReqBusy]       = useState(null);
   const [homeBase,  setHomeBase] = useState("");
   const [genCount,  setGenCount] = useState(100);
   const [customGen, setCustomGen]= useState("");
@@ -384,6 +387,13 @@ function RepDashboard({repId,repName,onLogout}) {
 
   const loadRequests = async () => {
     try { const d=await get(`/rep/${repId}/requests`); setRequests(d.requests); } catch{}
+  };
+
+  const saveReqName = async (id) => {
+    setReqBusy(id);
+    try { await post(`/request/${id}/rename`,{name:editReqName}); setEditingReqId(null); await loadRequests(); }
+    catch(e){ alert("Couldn't rename: "+e.message); }
+    setReqBusy(null);
   };
   const loadRoutes = async () => {
     try { const d=await get(`/rep/${repId}/routes`); setRoutes(d.routes); } catch{}
@@ -689,7 +699,10 @@ Or mix: 33596, Brandon, Valrico`}
               if(f.owner_occupied&&f.owner_occupied!=="Any") chips.push(`Owner: ${f.owner_occupied}`);
               if(f.price_min||f.price_max) chips.push(`$${f.price_min||"0"}–${f.price_max||"∞"}`);
               if(f.sale_date_from||f.sale_date_to) chips.push(`Moved ${f.sale_date_from||"…"} → ${f.sale_date_to||"…"}`);
-              if(f.home_count) chips.push(`${f.home_count} homes`);
+              if(f.home_count) chips.push(`${f.home_count} requested`);
+              const zm=(req.zip_meta&&typeof req.zip_meta==="object")?Object.entries(req.zip_meta):[];
+              const editing=editingReqId===req.id;
+              const displayName=req.name||`ZIPs: ${req.zips.join(", ")}`;
               return (
               <div key={req.id} style={card}>
                 <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
@@ -699,9 +712,26 @@ Or mix: 33596, Brandon, Valrico`}
                         background:"#1E2D3D",padding:"3px 8px",borderRadius:5}}>#{req.id}</span>
                       <StatusBadge status={req.status}/>
                     </div>
-                    <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>
-                      ZIPs: {req.zips.join(", ")}
-                    </div>
+                    {editing?(
+                      <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
+                        <input value={editReqName} onChange={e=>setEditReqName(e.target.value)} autoFocus
+                          onKeyDown={e=>{if(e.key==="Enter")saveReqName(req.id);if(e.key==="Escape")setEditingReqId(null);}}
+                          style={{...inp,padding:"6px 10px",fontSize:14,maxWidth:340}}/>
+                        <button onClick={()=>saveReqName(req.id)} disabled={reqBusy===req.id}
+                          style={{background:"#27AE60",border:"none",borderRadius:8,color:"white",fontWeight:700,
+                            fontSize:13,padding:"6px 10px",cursor:"pointer"}}>Save</button>
+                        <button onClick={()=>setEditingReqId(null)}
+                          style={{background:"#1E2D3D",border:"none",borderRadius:8,color:"#7A8FA6",
+                            fontSize:13,padding:"6px 9px",cursor:"pointer"}}>✕</button>
+                      </div>
+                    ):(
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                        <div style={{fontWeight:700,fontSize:15}}>{displayName}</div>
+                        <button onClick={()=>{setEditingReqId(req.id);setEditReqName(displayName);}} title="Rename"
+                          style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:13,
+                            cursor:"pointer",padding:"2px 4px"}}>✏️</button>
+                      </div>
+                    )}
                     <div style={{fontSize:12,color:"#4A6075",marginBottom:chips.length?8:0}}>
                       Requested {req.created_at||"—"}
                       {req.status==="ready"&&req.fulfilled_at&&<> · Ready {req.fulfilled_at}</>}
@@ -712,6 +742,23 @@ Or mix: 33596, Brandon, Valrico`}
                         {chips.map((c,i)=>(
                           <span key={i} style={{fontSize:11,color:"#7A8FA6",background:"#0A1118",
                             border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>{c}</span>
+                        ))}
+                      </div>
+                    )}
+                    {f.start_address&&<div style={{fontSize:12,color:"#7A8FA6",marginTop:8}}>📍 Start: {f.start_address}</div>}
+                    {zm.length>0&&(
+                      <div style={{marginTop:8,background:"#0A1118",border:"1px solid #1E2D3D",
+                        borderRadius:8,padding:"8px 10px",display:"grid",gap:5}}>
+                        <div style={{fontSize:10,color:"#4A6075",textTransform:"uppercase",
+                          letterSpacing:"1px",fontWeight:700}}>By ZIP</div>
+                        {zm.map(([z,m])=>(
+                          <div key={z} style={{fontSize:12,color:"#7A8FA6",display:"flex",
+                            gap:6,flexWrap:"wrap",alignItems:"baseline"}}>
+                            <span style={{fontWeight:700,color:"#B0C4D4"}}>{z}{m.city?` · ${m.city}`:""}</span>
+                            <span>·</span>
+                            <span>{(m.count||0).toLocaleString()} homes</span>
+                            {m.min_date&&m.min_date!=="N/A"&&<><span>·</span><span>moved {m.min_date}–{m.max_date}</span></>}
+                          </div>
                         ))}
                       </div>
                     )}
