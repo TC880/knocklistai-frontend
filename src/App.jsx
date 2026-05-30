@@ -227,21 +227,27 @@ function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
 // APP ROOT
 // ══════════════════════════════════════════════════════════════════════
 export default function App() {
-  const [screen,  setScreen]  = useState("login");
-  const [repName, setRepName] = useState("");
-  const [repId,   setRepId]   = useState("");
+  const [screen,  setScreen]  = useState(()=>{try{return localStorage.getItem("kl_screen")||"login";}catch{return "login";}});
+  const [repName, setRepName] = useState(()=>{try{return localStorage.getItem("kl_repName")||"";}catch{return "";}});
+  const [repId,   setRepId]   = useState(()=>{try{return localStorage.getItem("kl_repId")||"";}catch{return "";}});
   const [pin,     setPin]     = useState("");
   const [loginErr,setLoginErr]= useState("");
   const [loginTab,setLoginTab]= useState("rep");
 
   const loginRep = () => {
     if (!repName.trim()){setLoginErr("Enter your name");return;}
-    setRepId(repName.trim().toLowerCase().replace(/\s+/g,"_"));
-    setScreen("rep"); setLoginErr("");
+    const id=repName.trim().toLowerCase().replace(/\s+/g,"_");
+    setRepId(id); setScreen("rep"); setLoginErr("");
+    try{localStorage.setItem("kl_screen","rep");localStorage.setItem("kl_repName",repName.trim());localStorage.setItem("kl_repId",id);}catch{}
   };
   const loginAdmin = () => {
     if (pin!==ADMIN_PIN){setLoginErr("Wrong PIN");return;}
     setScreen("admin"); setLoginErr("");
+    try{localStorage.setItem("kl_screen","admin");}catch{}
+  };
+  const doLogout = () => {
+    setScreen("login"); setPin("");
+    try{localStorage.removeItem("kl_screen");localStorage.removeItem("kl_repName");localStorage.removeItem("kl_repId");}catch{}
   };
 
   if (screen==="login") return (
@@ -296,8 +302,8 @@ export default function App() {
     </div>
   );
 
-  if (screen==="rep")   return <RepDashboard   repId={repId} repName={repName} onLogout={()=>{setScreen("login");setPin("");}} />;
-  if (screen==="admin") return <AdminDashboard onLogout={()=>{setScreen("login");setPin("");}} />;
+  if (screen==="rep")   return <RepDashboard   repId={repId} repName={repName} onLogout={doLogout} />;
+  if (screen==="admin") return <AdminDashboard onLogout={doLogout} />;
 }
 
 // ══════════════════════════════════════════════════════════════════════
