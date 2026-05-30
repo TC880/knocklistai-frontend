@@ -1157,7 +1157,15 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           padding:40,textAlign:"center",color:"#4A6075"}}>
           {routes.length===0?"Generate a list first, then come back to drive it.":"No routes to show."}
         </div>
-      ):visibleRoutes.map(r=>(
+      ):visibleRoutes.map(r=>{
+        const f=r.filters||{};
+        const chips=[];
+        if(f.property_type&&f.property_type!=="Any") chips.push(f.property_type);
+        if(f.owner_occupied&&f.owner_occupied!=="Any") chips.push(`Owner: ${f.owner_occupied}`);
+        if(f.price_min||f.price_max) chips.push(`$${f.price_min||"0"}–${f.price_max||"∞"}`);
+        if(f.sale_date_from||f.sale_date_to) chips.push(`Moved ${f.sale_date_from||"…"} → ${f.sale_date_to||"…"}`);
+        if(f.home_count) chips.push(`${f.home_count} homes`);
+        return (
         <div key={r.id}
           style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
             padding:"16px",display:"flex",alignItems:"center",gap:10,opacity:r.hidden?0.55:1}}>
@@ -1174,11 +1182,19 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                   fontSize:13,padding:"8px 10px",cursor:"pointer"}}>✕</button>
             </div>
           ):(<>
-            <div style={{flex:1,cursor:"pointer"}} onClick={()=>loadDriveRoute(r.id)}>
+            <div style={{flex:1,cursor:"pointer",minWidth:0}} onClick={()=>loadDriveRoute(r.id)}>
               <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-              <div style={{fontSize:12,color:"#4A6075",marginTop:2}}>
-                {r.completed}/{r.total} done · {r.pct}% · {r.created}
+              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:chips.length?7:0}}>
+                {r.completed}/{r.total} done · {r.pct}%{r.created_at?` · ${r.created_at}`:""}
               </div>
+              {chips.length>0&&(
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {chips.map((c,i)=>(
+                    <span key={i} style={{fontSize:11,color:"#7A8FA6",background:"#0A1118",
+                      border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>{c}</span>
+                  ))}
+                </div>
+              )}
             </div>
             <button onClick={()=>{setEditingId(r.id);setEditLabel(r.label);}} title="Rename"
               style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
@@ -1190,7 +1206,8 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               style={{color:"#27AE60",fontWeight:700,cursor:"pointer"}}>Go →</span>
           </>)}
         </div>
-      ))}
+        );
+      })}
     </div>
     );
   }
