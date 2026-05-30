@@ -78,6 +78,36 @@ const navUrl = (addr, pref) => pref==="waze"
   ? `https://waze.com/ul?q=${encodeURIComponent(addr)}&navigate=yes`
   : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}&travelmode=driving`;
 
+// ── Calendar helpers (Appointment Set) ────────────────────────────────
+const _p2 = (n) => String(n).padStart(2,"0");
+const _icsStamp = (d) =>
+  d.getUTCFullYear()+_p2(d.getUTCMonth()+1)+_p2(d.getUTCDate())+"T"+
+  _p2(d.getUTCHours())+_p2(d.getUTCMinutes())+_p2(d.getUTCSeconds())+"Z";
+const _apptWindow = (whenLocal) => {
+  const s=new Date(whenLocal); const e=new Date(s.getTime()+30*60000); return [s,e];
+};
+const _apptTitle = (stop) => `Solar appt — ${stop.address||""}`;
+const _apptDetails = (stop) => [stop.owner,stop.phone].filter(Boolean).join(" · ");
+const googleCalUrl = (stop, whenLocal) => {
+  const [s,e]=_apptWindow(whenLocal);
+  const p=new URLSearchParams({action:"TEMPLATE",text:_apptTitle(stop),
+    dates:`${_icsStamp(s)}/${_icsStamp(e)}`,details:_apptDetails(stop),
+    location:stop.full_address||stop.address||""});
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+};
+const downloadIcs = (stop, whenLocal) => {
+  const [s,e]=_apptWindow(whenLocal);
+  const esc=(t)=>String(t||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g," ");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//KnockListAI//EN","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT","UID:"+Date.now()+"@knocklistai","DTSTAMP:"+_icsStamp(new Date()),
+    "DTSTART:"+_icsStamp(s),"DTEND:"+_icsStamp(e),
+    "SUMMARY:"+esc(_apptTitle(stop)),"LOCATION:"+esc(stop.full_address||stop.address||""),
+    "DESCRIPTION:"+esc(_apptDetails(stop)),"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));
+  a.download="solar-appointment.ics"; document.body.appendChild(a); a.click(); a.remove();
+};
+
 const TierBadge = ({name,color}) => (
   <span style={{background:color+"22",border:`1px solid ${color}55`,borderRadius:4,
     padding:"2px 8px",fontSize:11,fontWeight:700,color,whiteSpace:"nowrap"}}>{name}</span>
@@ -1039,6 +1069,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
   const [note,      setNote]      = useState("");
   const [phone,     setPhone]     = useState("");
   const [nqReasons, setNqReasons] = useState([]);
+  const [apptTime,  setApptTime]  = useState("");
   const [submitting,setSubmitting]= useState(false);
   const [navPref,   setNavPref]   = useState(()=>{
     try{return localStorage.getItem("navPref")||"waze";}catch{return "waze";}
@@ -1083,10 +1114,12 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
       let finalNote=note;
       if(o==="Not Qualified" && nqReasons.length){
         finalNote="Not qualified: "+nqReasons.join(", ")+(note?` — ${note}`:"");
+      } else if(o==="Appointment Set" && apptTime){
+        finalNote="Appt: "+new Date(apptTime).toLocaleString()+(note?` — ${note}`:"");
       }
       await post(`/route/${route.id}/stop/${currentStop.stop_num}/complete`,{outcome:o,note:finalNote,phone});
       await loadDriveRoute(route.id);
-      setOutcome("");setNote("");setPhone("");setNqReasons([]);
+      setOutcome("");setNote("");setPhone("");setNqReasons([]);setApptTime("");
     } catch(e){} finally{setSubmitting(false);}
   };
 
@@ -1158,13 +1191,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           {routes.length===0?"Generate a list first, then come back to drive it.":"No routes to show."}
         </div>
       ):visibleRoutes.map(r=>{
-        const f=r.filters||{};
-        const chips=[];
-        if(f.property_type&&f.property_type!=="Any") chips.push(f.property_type);
-        if(f.owner_occupied&&f.owner_occupied!=="Any") chips.push(`Owner: ${f.owner_occupied}`);
-        if(f.price_min||f.price_max) chips.push(`$${f.price_min||"0"}–${f.price_max||"∞"}`);
-        if(f.sale_date_from||f.sale_date_to) chips.push(`Moved ${f.sale_date_from||"…"} → ${f.sale_date_to||"…"}`);
-        if(f.home_count) chips.push(`${f.home_count} homes`);
+        const tcfg=Array.isArray(r.tier_config)?r.tier_config:[];
         return (
         <div key={r.id}
           style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
@@ -1184,14 +1211,17 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           ):(<>
             <div style={{flex:1,cursor:"pointer",minWidth:0}} onClick={()=>loadDriveRoute(r.id)}>
               <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:chips.length?7:0}}>
+              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:tcfg.length?7:0}}>
                 {r.completed}/{r.total} done · {r.pct}%{r.created_at?` · ${r.created_at}`:""}
               </div>
-              {chips.length>0&&(
+              {tcfg.length>0&&(
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {chips.map((c,i)=>(
-                    <span key={i} style={{fontSize:11,color:"#7A8FA6",background:"#0A1118",
-                      border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>{c}</span>
+                  {tcfg.map((t,i)=>(
+                    <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,
+                      color:"#B0C4D4",background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                      <span style={{width:8,height:8,borderRadius:"50%",background:t.color||"#7A8FA6",flexShrink:0}}/>
+                      {t.name}{t.range?` · ${t.range}`:""}
+                    </span>
                   ))}
                 </div>
               )}
@@ -1302,7 +1332,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               {OUTCOMES.map(({key,emoji,color})=>{
                 const isSelected = outcome===key;
                 return (
-                  <button key={key} onClick={()=>{const nv=isSelected?"":key; setOutcome(nv); if(nv!=="Not Qualified") setNqReasons([]);}}
+                  <button key={key} onClick={()=>{const nv=isSelected?"":key; setOutcome(nv); if(nv!=="Not Qualified") setNqReasons([]); if(nv!=="Appointment Set") setApptTime("");}}
                     disabled={submitting}
                     style={{padding:"16px 8px",borderRadius:12,
                       border:`2px solid ${isSelected?color:color+"44"}`,
@@ -1344,6 +1374,32 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                 </div>
                 <div style={{fontSize:11,color:"#7A8FA6",marginTop:10}}>
                   Pick any that apply — add detail in the note below if you want.
+                </div>
+              </div>
+            )}
+
+            {/* Appointment Set — schedule + add to calendar */}
+            {outcome==="Appointment Set" && (
+              <div style={{background:"#06140C",border:"1px solid #1E5631",borderRadius:12,
+                padding:"13px 14px",marginBottom:12}}>
+                <div style={{fontSize:11,color:"#27AE60",textTransform:"uppercase",
+                  letterSpacing:"1px",fontWeight:700,marginBottom:10}}>Appointment time</div>
+                <input type="datetime-local" value={apptTime} onChange={e=>setApptTime(e.target.value)}
+                  style={{...inp,marginBottom:10,colorScheme:"dark"}}/>
+                <div style={{display:"flex",gap:8}}>
+                  <button disabled={!apptTime} onClick={()=>window.open(googleCalUrl(currentStop,apptTime),"_blank")}
+                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #2A3D50",
+                      cursor:apptTime?"pointer":"default",
+                      background:apptTime?"#13241B":"#0D1520",color:apptTime?"#EAF2EC":"#4A6075",
+                      fontWeight:700,fontSize:13}}>📅 Google Calendar</button>
+                  <button disabled={!apptTime} onClick={()=>downloadIcs(currentStop,apptTime)}
+                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #2A3D50",
+                      cursor:apptTime?"pointer":"default",
+                      background:apptTime?"#13241B":"#0D1520",color:apptTime?"#EAF2EC":"#4A6075",
+                      fontWeight:700,fontSize:13}}>📆 Apple Calendar</button>
+                </div>
+                <div style={{fontSize:11,color:"#7A8FA6",marginTop:9}}>
+                  Pick a time, tap your calendar to add it, then log the outcome. The time is saved with this stop too.
                 </div>
               </div>
             )}
