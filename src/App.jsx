@@ -24,6 +24,7 @@ const OUTCOMES = [
   {key:"Appointment Set",  emoji:"⭐", color:"#27AE60"},
   {key:"Already Has Solar",emoji:"☀️", color:"#2471A3"},
   {key:"Come Back Later",  emoji:"🔄", color:"#8E44AD"},
+  {key:"Not Qualified",    emoji:"⛔", color:"#AF601A"},
 ];
 const TIER_WINDOWS = [
   {id:"t1",key:"T1",range:"0–3 mo", months:3,  defaultColor:"#E67E22",defaultBg:"#FFF3E0",defaultName:"Tier 1"},
@@ -978,10 +979,11 @@ Or mix: 33596, Brandon, Valrico`}
                   <div style={{fontWeight:700,fontSize:14,marginBottom:3}}>{h.full_address||h.address}</div>
                   {h.owner&&<div style={{fontSize:12,color:"#7A8FA6",marginBottom:6}}>{h.owner}</div>}
                   <span style={{fontSize:11,fontWeight:600,
-                    color:h.outcome==="Already Has Solar"?"#F5A623":"#E74C3C",
+                    color:h.outcome==="Already Has Solar"?"#F5A623":h.outcome==="Not Qualified"?"#D68910":"#E74C3C",
                     background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
                     {h.outcome}
                   </span>
+                  {h.note&&<div style={{fontSize:12,color:"#7A8FA6",marginTop:7,fontStyle:"italic"}}>"{h.note}"</div>}
                 </div>
                 <button onClick={()=>restoreHome(h.address)} disabled={exBusy===h.address}
                   style={{background:"transparent",border:"1px solid #27AE60",borderRadius:8,
@@ -1036,6 +1038,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
   const [outcome,   setOutcome]   = useState("");
   const [note,      setNote]      = useState("");
   const [phone,     setPhone]     = useState("");
+  const [nqReasons, setNqReasons] = useState([]);
   const [submitting,setSubmitting]= useState(false);
   const [navPref,   setNavPref]   = useState(()=>{
     try{return localStorage.getItem("navPref")||"waze";}catch{return "waze";}
@@ -1077,9 +1080,13 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     if (!o) return;
     setSubmitting(true);
     try {
-      await post(`/route/${route.id}/stop/${currentStop.stop_num}/complete`,{outcome:o,note,phone});
+      let finalNote=note;
+      if(o==="Not Qualified" && nqReasons.length){
+        finalNote="Not qualified: "+nqReasons.join(", ")+(note?` — ${note}`:"");
+      }
+      await post(`/route/${route.id}/stop/${currentStop.stop_num}/complete`,{outcome:o,note:finalNote,phone});
       await loadDriveRoute(route.id);
-      setOutcome("");setNote("");setPhone("");
+      setOutcome("");setNote("");setPhone("");setNqReasons([]);
     } catch(e){} finally{setSubmitting(false);}
   };
 
@@ -1278,7 +1285,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               {OUTCOMES.map(({key,emoji,color})=>{
                 const isSelected = outcome===key;
                 return (
-                  <button key={key} onClick={()=>setOutcome(isSelected?"":key)}
+                  <button key={key} onClick={()=>{const nv=isSelected?"":key; setOutcome(nv); if(nv!=="Not Qualified") setNqReasons([]);}}
                     disabled={submitting}
                     style={{padding:"16px 8px",borderRadius:12,
                       border:`2px solid ${isSelected?color:color+"44"}`,
@@ -1297,6 +1304,32 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                 );
               })}
             </div>
+
+            {/* Not Qualified reasons */}
+            {outcome==="Not Qualified" && (
+              <div style={{background:"#1A1206",border:"1px solid #5A4419",borderRadius:12,
+                padding:"13px 14px",marginBottom:12}}>
+                <div style={{fontSize:11,color:"#D68910",textTransform:"uppercase",
+                  letterSpacing:"1px",fontWeight:700,marginBottom:10}}>Why not qualified?</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                  {["Shade","Roof Condition","Credit"].map(r=>{
+                    const on=nqReasons.includes(r);
+                    return (
+                      <button key={r} onClick={()=>setNqReasons(on?nqReasons.filter(x=>x!==r):[...nqReasons,r])}
+                        disabled={submitting}
+                        style={{padding:"9px 15px",borderRadius:20,cursor:"pointer",fontSize:13,fontWeight:700,
+                          border:`1.5px solid ${on?"#F5A623":"#5A4419"}`,
+                          background:on?"#F5A62333":"transparent",color:on?"#FFB23E":"#B0C4D4"}}>
+                        {on?"✓ ":""}{r}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{fontSize:11,color:"#7A8FA6",marginTop:10}}>
+                  Pick any that apply — add detail in the note below if you want.
+                </div>
+              </div>
+            )}
 
             {/* Submit button — only active when outcome selected */}
             <button onClick={()=>doComplete()} disabled={!outcome||submitting}
