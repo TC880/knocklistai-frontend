@@ -158,7 +158,7 @@ function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
   const mapRef    = useRef(null);
   const mapObjRef = useRef(null);
 
-  const tierColor = (k) => tiers.find(t=>t.key===k)?.color || "#7A8FA6";
+  const tierColor = (k) => tiers.find(t=>t.key===k)?.color || "#5B675D";
 
   const loadLeaflet = (cb) => {
     if (window.L) { cb(); return; }
@@ -253,8 +253,8 @@ function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
   const stopsWithCoords = stops.filter(s=>s.lat&&s.lon);
 
   if (!stopsWithCoords.length) return (
-    <div style={{background:"#0D1520",border:"1px solid #1E2D3D",borderRadius:12,
-      padding:32,textAlign:"center",color:"#4A6075"}}>
+    <div style={{background:"#F0F3EB",border:"1px solid #CFD6C7",borderRadius:12,
+      padding:32,textAlign:"center",color:"#909C92"}}>
       No coordinate data — generate a new route to see the map.
     </div>
   );
@@ -262,25 +262,25 @@ function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
   return (
     <div>
       <div ref={mapRef} style={{height:440,borderRadius:12,overflow:"hidden",
-        border:"1px solid #1E2D3D",background:"#0D1520"}}/>
+        border:"1px solid #CFD6C7",background:"#F0F3EB"}}/>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
         {tiers.filter(t=>t.enabled).map(t=>(
           <div key={t.key} style={{display:"flex",alignItems:"center",gap:5,
-            background:"#0D1520",border:"1px solid #1E2D3D",borderRadius:20,padding:"3px 10px"}}>
+            background:"#F0F3EB",border:"1px solid #CFD6C7",borderRadius:20,padding:"3px 10px"}}>
             <div style={{width:10,height:10,borderRadius:"50%",background:t.color}}/>
             <span style={{fontSize:11,color:"white",fontWeight:600}}>{t.name}</span>
           </div>
         ))}
         <div style={{display:"flex",alignItems:"center",gap:5,
-          background:"#0D1520",border:"1px solid #1E2D3D",borderRadius:20,padding:"3px 10px"}}>
+          background:"#F0F3EB",border:"1px solid #CFD6C7",borderRadius:20,padding:"3px 10px"}}>
           <div style={{width:22,height:3,background:"#27AE60",opacity:0.5,borderRadius:2,
             borderTop:"2px dashed #27AE60"}}/>
-          <span style={{fontSize:11,color:"#7A8FA6"}}>Route</span>
+          <span style={{fontSize:11,color:"#5B675D"}}>Route</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:5,
-          background:"#0D1520",border:"1px solid #1E2D3D",borderRadius:20,padding:"3px 10px"}}>
+          background:"#F0F3EB",border:"1px solid #CFD6C7",borderRadius:20,padding:"3px 10px"}}>
           <div style={{width:10,height:10,borderRadius:"50%",background:"#555"}}/>
-          <span style={{fontSize:11,color:"#7A8FA6"}}>Done</span>
+          <span style={{fontSize:11,color:"#5B675D"}}>Done</span>
         </div>
       </div>
     </div>
@@ -374,52 +374,52 @@ export default function App() {
   };
 
   if (screen==="login") return (
-    <div style={{minHeight:"100vh",background:"#080E14",display:"flex",alignItems:"center",
+    <div style={{minHeight:"100vh",background:"#E7EBE2",display:"flex",alignItems:"center",
       justifyContent:"center",fontFamily:KLFONT,padding:"20px"}}>
       <div style={{width:"100%",maxWidth:380}}>
         <div style={{textAlign:"center",marginBottom:32}}>
           <div style={{width:60,height:60,background:"linear-gradient(135deg,#F5A623,#E8820C)",
             borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",
             fontSize:30,margin:"0 auto 14px"}}>☀️</div>
-          <div style={{fontSize:26,fontWeight:800,color:"white",letterSpacing:"-0.5px"}}>
+          <div style={{fontSize:26,fontWeight:800,color:"#222A24",letterSpacing:"-0.5px"}}>
             KnockList<span style={{color:"#F5A623"}}>AI</span></div>
-          <div style={{fontSize:13,color:"#4A6075",marginTop:5}}>Solar door-knock routes, instantly</div>
+          <div style={{fontSize:13,color:"#909C92",marginTop:5}}>Solar door-knock routes, instantly</div>
         </div>
-        <div style={{display:"flex",background:"#0D1520",borderRadius:12,padding:4,
-          marginBottom:16,border:"1px solid #1E2D3D"}}>
+        <div style={{display:"flex",background:"#F0F3EB",borderRadius:12,padding:4,
+          marginBottom:16,border:"1px solid #CFD6C7"}}>
           {[["rep","Sales Rep"],["admin","Admin"]].map(([t,l])=>(
             <button key={t} onClick={()=>setLoginTab(t)} style={{flex:1,padding:"10px 0",
-              background:loginTab===t?"#1E2D3D":"transparent",border:"none",borderRadius:9,
-              color:loginTab===t?"white":"#4A6075",fontSize:14,fontWeight:600,cursor:"pointer"}}>{l}</button>
+              background:loginTab===t?"#CFD6C7":"transparent",border:"none",borderRadius:9,
+              color:loginTab===t?"#222A24":"#909C92",fontSize:14,fontWeight:600,cursor:"pointer"}}>{l}</button>
           ))}
         </div>
-        <div style={{background:"#0D1520",border:"1px solid #1E2D3D",borderRadius:16,padding:24}}>
+        <div style={{background:"#F0F3EB",border:"1px solid #CFD6C7",borderRadius:16,padding:24}}>
           {loginTab==="rep"?(<>
             <label style={{fontSize:11,fontWeight:600,color:"#F5A623",letterSpacing:"1px",
               textTransform:"uppercase",display:"block",marginBottom:8}}>Your Name</label>
             <input value={repName} onChange={e=>setRepName(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&loginRep()} placeholder="e.g. Justin Torres"
-              style={{width:"100%",background:"#080E14",border:"1px solid #2A3D50",borderRadius:10,
-                color:"white",padding:"14px 16px",fontSize:16,outline:"none",
+              style={{width:"100%",background:"#E7EBE2",border:"1px solid #C2C9B9",borderRadius:10,
+                color:"#222A24",padding:"14px 16px",fontSize:16,outline:"none",
                 boxSizing:"border-box",marginBottom:14}}/>
             <button onClick={loginRep} style={{width:"100%",
               background:"linear-gradient(135deg,#F5A623,#E8820C)",border:"none",
-              borderRadius:12,color:"#0A0A0A",fontWeight:800,fontSize:16,
+              borderRadius:12,color:"#3A2600",fontWeight:800,fontSize:16,
               padding:"14px 0",cursor:"pointer"}}>Sign In →</button>
           </>):(<>
             <label style={{fontSize:11,fontWeight:600,color:"#F5A623",letterSpacing:"1px",
               textTransform:"uppercase",display:"block",marginBottom:8}}>Admin PIN</label>
             <input type="password" value={pin} onChange={e=>setPin(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&loginAdmin()} placeholder="Enter PIN"
-              style={{width:"100%",background:"#080E14",border:"1px solid #2A3D50",borderRadius:10,
-                color:"white",padding:"14px 16px",fontSize:16,outline:"none",
+              style={{width:"100%",background:"#E7EBE2",border:"1px solid #C2C9B9",borderRadius:10,
+                color:"#222A24",padding:"14px 16px",fontSize:16,outline:"none",
                 boxSizing:"border-box",marginBottom:14}}/>
             <button onClick={loginAdmin} style={{width:"100%",
               background:"linear-gradient(135deg,#1B4F2E,#27AE60)",border:"none",
               borderRadius:12,color:"white",fontWeight:800,fontSize:16,
               padding:"14px 0",cursor:"pointer"}}>Admin Access →</button>
           </>)}
-          {loginErr&&<div style={{marginTop:10,fontSize:13,color:"#FF6B6B",textAlign:"center"}}>{loginErr}</div>}
+          {loginErr&&<div style={{marginTop:10,fontSize:13,color:"#D24F3D",textAlign:"center"}}>{loginErr}</div>}
         </div>
       </div>
     </div>
@@ -595,11 +595,11 @@ function RepDashboard({repId,repName,onLogout}) {
     finally{setLoading(false);}
   };
 
-  const C = {bg:"#080E14",card:"#0D1520",border:"#1E2D3D",sun:"#F5A623",green:"#27AE60"};
+  const C = {bg:"#E7EBE2",card:"#F0F3EB",border:"#CFD6C7",sun:"#F5A623",green:"#27AE60"};
   const card={background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:18};
   const lbl={fontSize:11,fontWeight:600,color:C.sun,letterSpacing:"1px",textTransform:"uppercase",display:"block",marginBottom:8};
-  const inp={width:"100%",background:"#080E14",border:"1px solid #2A3D50",borderRadius:10,
-    color:"white",padding:"12px 14px",fontSize:15,outline:"none",boxSizing:"border-box"};
+  const inp={width:"100%",background:"#E7EBE2",border:"1px solid #C2C9B9",borderRadius:10,
+    color:"#222A24",padding:"12px 14px",fontSize:15,outline:"none",boxSizing:"border-box"};
 
   const TABS=[
     {id:"request",  icon:"📋", label:"Request"},
@@ -611,10 +611,10 @@ function RepDashboard({repId,repName,onLogout}) {
 
   return (
     <div style={{minHeight:"100vh",background:C.bg,fontFamily:KLFONT,
-      color:"white",paddingBottom:80}}>
+      color:"#222A24",paddingBottom:80}}>
 
       {/* Header */}
-      <div style={{background:"#0A1118",borderBottom:`1px solid ${C.border}`,
+      <div style={{background:"#EDEFEA",borderBottom:`1px solid ${C.border}`,
         padding:"0 16px",height:52,display:"flex",alignItems:"center",
         justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -623,9 +623,9 @@ function RepDashboard({repId,repName,onLogout}) {
           <span style={{fontWeight:800,fontSize:15}}>KnockList<span style={{color:C.sun}}>AI</span></span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:12,color:"#7A8FA6"}}>👤 {repName}</span>
-          <button onClick={onLogout} style={{background:"transparent",border:"1px solid #2A3D50",
-            borderRadius:8,color:"#7A8FA6",fontSize:12,padding:"5px 10px",cursor:"pointer"}}>
+          <span style={{fontSize:12,color:"#5B675D"}}>👤 {repName}</span>
+          <button onClick={onLogout} style={{background:"transparent",border:"1px solid #C2C9B9",
+            borderRadius:8,color:"#5B675D",fontSize:12,padding:"5px 10px",cursor:"pointer"}}>
             Out
           </button>
         </div>
@@ -639,11 +639,11 @@ function RepDashboard({repId,repName,onLogout}) {
           <div style={{display:"grid",gap:14}}>
             <div>
               <h2 style={{fontSize:22,fontWeight:800,margin:0}}>Request Data</h2>
-              <p style={{color:"#4A6075",fontSize:13,margin:"5px 0 0"}}>
+              <p style={{color:"#909C92",fontSize:13,margin:"5px 0 0"}}>
                 Your admin pulls this exact data and uploads it to your portal.
               </p>
             </div>
-            {msg&&<div style={{background:"#0D2B1A",border:"1px solid #27AE60",borderRadius:10,
+            {msg&&<div style={{background:"#D8ECDF",border:"1px solid #27AE60",borderRadius:10,
               padding:"12px 16px",fontSize:14,color:"#27AE60"}}>{msg}</div>}
 
             <div style={card}>
@@ -654,7 +654,7 @@ Towns
 County
 State`}
                 style={{...inp,height:100,resize:"none",lineHeight:1.6,fontFamily:"inherit"}}/>
-              <p style={{margin:"6px 0 0",fontSize:12,color:"#4A6075"}}>
+              <p style={{margin:"6px 0 0",fontSize:12,color:"#909C92"}}>
                 Enter any combination of ZIP codes, towns, county, or state
               </p>
             </div>
@@ -663,7 +663,7 @@ State`}
               <span style={lbl}>Sale Date Range</span>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div>
-                  <span style={{fontSize:10,color:"#7A8FA6",display:"block",marginBottom:6,fontWeight:600}}>FROM</span>
+                  <span style={{fontSize:10,color:"#5B675D",display:"block",marginBottom:6,fontWeight:600}}>FROM</span>
                   <select value={dateFrom} onChange={e=>setDateFrom(e.target.value)}
                     style={{...inp,cursor:"pointer"}}>
                     <option value="">No limit</option>
@@ -671,7 +671,7 @@ State`}
                   </select>
                 </div>
                 <div>
-                  <span style={{fontSize:10,color:"#7A8FA6",display:"block",marginBottom:6,fontWeight:600}}>TO</span>
+                  <span style={{fontSize:10,color:"#5B675D",display:"block",marginBottom:6,fontWeight:600}}>TO</span>
                   <select value={dateTo} onChange={e=>setDateTo(e.target.value)}
                     style={{...inp,cursor:"pointer"}}>
                     <option value="">No limit</option>
@@ -680,7 +680,7 @@ State`}
                 </div>
               </div>
               {dateFrom&&dateTo&&(
-                <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
+                <div style={{marginTop:10,background:"#D8ECDF",border:"1px solid #D8ECDF",
                   borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
                   ✓ {MONTHS.find(m=>m.val===dateFrom)?.lbl} → {MONTHS.find(m=>m.val===dateTo)?.lbl}
                 </div>
@@ -691,13 +691,13 @@ State`}
               <span style={lbl}>Sale Price Range</span>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div>
-                  <span style={{fontSize:10,color:"#7A8FA6",display:"block",marginBottom:6,fontWeight:600}}>MIN</span>
+                  <span style={{fontSize:10,color:"#5B675D",display:"block",marginBottom:6,fontWeight:600}}>MIN</span>
                   <input value={priceMin?("$"+Number(priceMin.replace(/\D/g,"")||0).toLocaleString()):""}
                     onChange={e=>setPriceMin(e.target.value.replace(/\D/g,""))}
                     placeholder="e.g. $200,000" style={inp}/>
                 </div>
                 <div>
-                  <span style={{fontSize:10,color:"#7A8FA6",display:"block",marginBottom:6,fontWeight:600}}>MAX</span>
+                  <span style={{fontSize:10,color:"#5B675D",display:"block",marginBottom:6,fontWeight:600}}>MAX</span>
                   <input value={priceMax?("$"+Number(priceMax.replace(/\D/g,"")||0).toLocaleString()):""}
                     onChange={e=>setPriceMax(e.target.value.replace(/\D/g,""))}
                     placeholder="e.g. $800,000" style={inp}/>
@@ -712,9 +712,9 @@ State`}
                   <button key={o} onClick={()=>setOwnerOcc(o)}
                     style={{display:"block",width:"100%",padding:"12px 14px",borderRadius:10,
                       textAlign:"left",marginBottom:8,
-                      border:`2px solid ${ownerOcc===o?"#F5A623":"#2A3D50"}`,
-                      background:ownerOcc===o?"#3A2800":"transparent",
-                      color:ownerOcc===o?"#F5A623":"#7A8FA6",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                      border:`2px solid ${ownerOcc===o?"#F5A623":"#C2C9B9"}`,
+                      background:ownerOcc===o?"#EEE2CA":"transparent",
+                      color:ownerOcc===o?"#F5A623":"#5B675D",fontSize:14,fontWeight:600,cursor:"pointer"}}>
                     {o==="Yes"?"✓ Owner Occ.":o==="No"?"✗ Non-Owner":"— Any"}
                   </button>
                 ))}
@@ -725,9 +725,9 @@ State`}
                   <button key={p} onClick={()=>setPropType(p)}
                     style={{display:"block",width:"100%",padding:"10px 12px",borderRadius:10,
                       textAlign:"left",marginBottom:8,
-                      border:`2px solid ${propType===p?"#F5A623":"#2A3D50"}`,
-                      background:propType===p?"#3A2800":"transparent",
-                      color:propType===p?"#F5A623":"#7A8FA6",fontSize:12,fontWeight:600,cursor:"pointer"}}>{p}</button>
+                      border:`2px solid ${propType===p?"#F5A623":"#C2C9B9"}`,
+                      background:propType===p?"#EEE2CA":"transparent",
+                      color:propType===p?"#F5A623":"#5B675D",fontSize:12,fontWeight:600,cursor:"pointer"}}>{p}</button>
                 ))}
               </div>
             </div>
@@ -738,9 +738,9 @@ State`}
                 {COUNTS.map(c=>(
                   <button key={c} onClick={()=>{setHomeCount(c);if(c!=="Custom")setCustomCnt("");}}
                     style={{padding:"10px 16px",borderRadius:10,
-                      border:`2px solid ${homeCount===c?"#F5A623":"#2A3D50"}`,
-                      background:homeCount===c?"#3A2800":"transparent",
-                      color:homeCount===c?"#F5A623":"#7A8FA6",fontSize:14,fontWeight:600,cursor:"pointer"}}>{c}</button>
+                      border:`2px solid ${homeCount===c?"#F5A623":"#C2C9B9"}`,
+                      background:homeCount===c?"#EEE2CA":"transparent",
+                      color:homeCount===c?"#F5A623":"#5B675D",fontSize:14,fontWeight:600,cursor:"pointer"}}>{c}</button>
                 ))}
               </div>
               {homeCount==="Custom"&&<input type="number" value={customCnt}
@@ -752,7 +752,7 @@ State`}
               <span style={lbl}>Your Starting Address</span>
               <input value={startAddr} onChange={e=>setStartAddr(e.target.value)}
                 placeholder="e.g. 123 Main St, City, ST 00000" style={inp}/>
-              <p style={{margin:"8px 0 0",fontSize:12,color:"#4A6075"}}>
+              <p style={{margin:"8px 0 0",fontSize:12,color:"#909C92"}}>
                 Route will be optimized closest-to-closest from here
               </p>
             </div>
@@ -763,12 +763,12 @@ State`}
                 placeholder="e.g. Focus Tier 2, need by Tuesday" style={inp}/>
             </div>
 
-            {reqErr&&<div style={{background:"#2B0A0A",border:"1px solid #C0392B",
-              borderRadius:10,padding:"12px 16px",fontSize:14,color:"#FF6B6B"}}>{reqErr}</div>}
+            {reqErr&&<div style={{background:"#FBE4DF",border:"1px solid #C0392B",
+              borderRadius:10,padding:"12px 16px",fontSize:14,color:"#D24F3D"}}>{reqErr}</div>}
 
             <button onClick={submitRequest} disabled={loading}
-              style={{background:loading?"#2A3D50":"linear-gradient(135deg,#F5A623,#E8820C)",
-                border:"none",borderRadius:14,color:"#0A0A0A",fontWeight:800,
+              style={{background:loading?"#C2C9B9":"linear-gradient(135deg,#F5A623,#E8820C)",
+                border:"none",borderRadius:14,color:"#3A2600",fontWeight:800,
                 fontSize:16,padding:"16px 0",cursor:loading?"default":"pointer"}}>
               {loading?"Submitting…":"📤  Submit Data Request"}
             </button>
@@ -781,15 +781,15 @@ State`}
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div>
                 <h2 style={{fontSize:22,fontWeight:800,margin:0}}>My Requests</h2>
-                <p style={{color:"#4A6075",fontSize:13,margin:"5px 0 0"}}>
+                <p style={{color:"#909C92",fontSize:13,margin:"5px 0 0"}}>
                   {readyReqs.length>0?`${readyReqs.length} ready — go to Generate`:"Waiting for admin to upload"}
                 </p>
               </div>
-              <button onClick={loadRequests} style={{background:"#1E2D3D",border:"none",
-                borderRadius:10,color:"#7A8FA6",fontSize:14,padding:"10px 16px",cursor:"pointer"}}>↻</button>
+              <button onClick={loadRequests} style={{background:"#CFD6C7",border:"none",
+                borderRadius:10,color:"#5B675D",fontSize:14,padding:"10px 16px",cursor:"pointer"}}>↻</button>
             </div>
             {requests.length===0?(
-              <div style={{...card,textAlign:"center",padding:40,color:"#4A6075"}}>
+              <div style={{...card,textAlign:"center",padding:40,color:"#909C92"}}>
                 No requests yet. Go to Request to get started.
               </div>
             ):requests.map(req=>{
@@ -807,8 +807,8 @@ State`}
                 <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}>
-                      <span style={{fontFamily:"monospace",fontSize:11,color:"#4A6075",
-                        background:"#1E2D3D",padding:"3px 8px",borderRadius:5}}>#{req.id}</span>
+                      <span style={{fontFamily:"monospace",fontSize:11,color:"#909C92",
+                        background:"#CFD6C7",padding:"3px 8px",borderRadius:5}}>#{req.id}</span>
                       <StatusBadge status={req.status}/>
                     </div>
                     {editing?(
@@ -820,18 +820,18 @@ State`}
                           style={{background:"#27AE60",border:"none",borderRadius:8,color:"white",fontWeight:700,
                             fontSize:13,padding:"6px 10px",cursor:"pointer"}}>Save</button>
                         <button onClick={()=>setEditingReqId(null)}
-                          style={{background:"#1E2D3D",border:"none",borderRadius:8,color:"#7A8FA6",
+                          style={{background:"#CFD6C7",border:"none",borderRadius:8,color:"#5B675D",
                             fontSize:13,padding:"6px 9px",cursor:"pointer"}}>✕</button>
                       </div>
                     ):(
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                         <div style={{fontWeight:700,fontSize:15}}>{displayName}</div>
                         <button onClick={()=>{setEditingReqId(req.id);setEditReqName(displayName);}} title="Rename"
-                          style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:13,
+                          style={{background:"transparent",border:"none",color:"#5B675D",fontSize:13,
                             cursor:"pointer",padding:"2px 4px"}}>✏️</button>
                       </div>
                     )}
-                    <div style={{fontSize:12,color:"#4A6075",marginBottom:chips.length?8:0}}>
+                    <div style={{fontSize:12,color:"#909C92",marginBottom:chips.length?8:0}}>
                       Requested {req.created_at||"—"}
                       {req.status==="ready"&&req.fulfilled_at&&<> · Ready {req.fulfilled_at}</>}
                       {req.status==="ready"&&req.row_count?<> · {req.row_count.toLocaleString()} homes</>:null}
@@ -839,14 +839,14 @@ State`}
                     {chips.length>0&&(
                       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                         {chips.map((c,i)=>(
-                          <span key={i} style={{fontSize:11,color:"#7A8FA6",background:"#0A1118",
-                            border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>{c}</span>
+                          <span key={i} style={{fontSize:11,color:"#5B675D",background:"#EDEFEA",
+                            border:"1px solid #CFD6C7",borderRadius:6,padding:"3px 8px"}}>{c}</span>
                         ))}
                       </div>
                     )}
-                    {f.start_address&&<div style={{fontSize:12,color:"#7A8FA6",marginTop:8}}>📍 Start: {f.start_address}</div>}
+                    {f.start_address&&<div style={{fontSize:12,color:"#5B675D",marginTop:8}}>📍 Start: {f.start_address}</div>}
                     <ZipDetail zm={zm} open={zipOpen[req.id]} onToggle={(e)=>{e.stopPropagation();toggleZip(req.id);}}/>
-                    {req.note&&<div style={{fontSize:13,color:"#7A8FA6",marginTop:8,fontStyle:"italic"}}>"{req.note}"</div>}
+                    {req.note&&<div style={{fontSize:13,color:"#5B675D",marginTop:8,fontStyle:"italic"}}>"{req.note}"</div>}
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end",flexShrink:0}}>
                     {req.status==="ready"&&(
@@ -861,7 +861,7 @@ State`}
                       </button>
                     )}
                     <button onClick={()=>deleteReq(req)} disabled={reqBusy===req.id} title="Delete this list"
-                      style={{background:"transparent",border:"1px solid #3A2530",borderRadius:9,
+                      style={{background:"transparent",border:"1px solid #FBE4DF",borderRadius:9,
                         color:"#C0392B",fontWeight:600,fontSize:12,padding:"7px 11px",
                         cursor:"pointer",whiteSpace:"nowrap"}}>
                       🗑 Delete
@@ -879,7 +879,7 @@ State`}
           <div style={{display:"grid",gap:14}}>
             <div>
               <h2 style={{fontSize:22,fontWeight:800,margin:0}}>Generate List</h2>
-              <p style={{color:"#4A6075",fontSize:13,margin:"5px 0 0"}}>
+              <p style={{color:"#909C92",fontSize:13,margin:"5px 0 0"}}>
                 Configure tiers, set count, generate your routed list.
               </p>
             </div>
@@ -888,7 +888,7 @@ State`}
             <div style={card}>
               <span style={lbl}>Select Data</span>
               {readyReqs.length===0?(
-                <div style={{fontSize:14,color:"#4A6075"}}>No fulfilled requests yet.</div>
+                <div style={{fontSize:14,color:"#909C92"}}>No fulfilled requests yet.</div>
               ):readyReqs.map(req=>{
                 const f=req.filters||{};
                 const chips=[];
@@ -903,20 +903,20 @@ State`}
                   setSelReq(sel?null:req);
                   if(!sel&&req.filters?.start_address) setHomeBase(req.filters.start_address);
                 }} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"14px 16px",
-                  background:sel?"#0D2B1A":"#080E14",
-                  border:`2px solid ${sel?"#27AE60":"#2A3D50"}`,
+                  background:sel?"#D8ECDF":"#E7EBE2",
+                  border:`2px solid ${sel?"#27AE60":"#C2C9B9"}`,
                   borderRadius:12,cursor:"pointer",marginBottom:8}}>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontWeight:700,fontSize:14}}>{req.name||`ZIPs: ${req.zips.join(", ")}`}</div>
-                    <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:chips.length?8:0}}>
+                    <div style={{fontSize:12,color:"#909C92",marginTop:2,marginBottom:chips.length?8:0}}>
                       {req.row_count?.toLocaleString()||"—"} homes loaded
                       {req.fulfilled_at&&<> · ready {req.fulfilled_at}</>}
                     </div>
                     {chips.length>0&&(
                       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                         {chips.map((c,i)=>(
-                          <span key={i} style={{fontSize:11,color:"#7A8FA6",background:"#0A1118",
-                            border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>{c}</span>
+                          <span key={i} style={{fontSize:11,color:"#5B675D",background:"#EDEFEA",
+                            border:"1px solid #CFD6C7",borderRadius:6,padding:"3px 8px"}}>{c}</span>
                         ))}
                       </div>
                     )}
@@ -924,7 +924,7 @@ State`}
                   </div>
                   <div style={{width:22,height:22,borderRadius:"50%",marginTop:2,
                     background:sel?"#27AE60":"transparent",
-                    border:`2.5px solid ${sel?"#27AE60":"#2A3D50"}`,flexShrink:0}}/>
+                    border:`2.5px solid ${sel?"#27AE60":"#C2C9B9"}`,flexShrink:0}}/>
                 </div>
                 );
               })}
@@ -934,7 +934,7 @@ State`}
               {/* Quick date filter */}
               <div style={card}>
                 <span style={lbl}>⚡ Move-In Window Filter</span>
-                <p style={{fontSize:12,color:"#4A6075",marginBottom:12}}>
+                <p style={{fontSize:12,color:"#909C92",marginBottom:12}}>
                   Toggle to instantly focus on a specific time window. Route rebuilds automatically.
                 </p>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -947,14 +947,14 @@ State`}
                         else { setQuickFilters(prev=> prev.includes(k) ? prev.filter(x=>x!==k) : [...prev,k]); }
                       }}
                       style={{padding:"10px 14px",borderRadius:20,fontSize:13,fontWeight:600,cursor:"pointer",
-                        border:`2px solid ${active?"#C0392B":"#2A3D50"}`,
-                        background:active?"#2B0A0A":"transparent",
-                        color:active?"#C0392B":"#7A8FA6"}}>{l}</button>
+                        border:`2px solid ${active?"#C0392B":"#C2C9B9"}`,
+                        background:active?"#FBE4DF":"transparent",
+                        color:active?"#C0392B":"#5B675D"}}>{l}</button>
                     );
                   })}
                 </div>
                 {quickFilters.length>0&&(
-                  <div style={{marginTop:10,background:"#0D2B1A",border:"1px solid #1A3A2A",
+                  <div style={{marginTop:10,background:"#D8ECDF",border:"1px solid #D8ECDF",
                     borderRadius:8,padding:"8px 12px",fontSize:13,color:"#27AE60"}}>
                     ✓ Route will only include homes from: {quickFilters.map(k=>({last1:"Last month",last3:"1–3 months",last6:"3–6 months",last9:"6–9 months"}[k])).join(", ")}
                   </div>
@@ -964,7 +964,7 @@ State`}
               {/* Route order toggle */}
               <div style={card}>
                 <span style={lbl}>🗺 Route Order</span>
-                <div style={{marginTop:6,background:"#0D2B1A",border:"1px solid #1A3A2A",
+                <div style={{marginTop:6,background:"#D8ECDF",border:"1px solid #D8ECDF",
                   borderRadius:8,padding:"10px 12px",fontSize:13,color:"#27AE60"}}>
                   ✓ Stops follow the order from your uploaded file
                 </div>
@@ -983,9 +983,9 @@ State`}
                   {COUNTS.map(c=>(
                     <button key={c} onClick={()=>{setGenCount(c);if(c!=="Custom")setCustomGen("");}}
                       style={{padding:"10px 14px",borderRadius:10,
-                        border:`2px solid ${genCount===c?"#F5A623":"#2A3D50"}`,
-                        background:genCount===c?"#3A2800":"transparent",
-                        color:genCount===c?"#F5A623":"#7A8FA6",fontSize:13,fontWeight:600,cursor:"pointer"}}>{c}</button>
+                        border:`2px solid ${genCount===c?"#F5A623":"#C2C9B9"}`,
+                        background:genCount===c?"#EEE2CA":"transparent",
+                        color:genCount===c?"#F5A623":"#5B675D",fontSize:13,fontWeight:600,cursor:"pointer"}}>{c}</button>
                   ))}
                 </div>
                 {genCount==="Custom"&&<input type="number" value={customGen}
@@ -996,7 +996,7 @@ State`}
               <div style={card}>
                 <span style={lbl}>Starting Address</span>
                 <input value={homeBase} onChange={e=>setHomeBase(e.target.value)} style={inp}/>
-                <p style={{margin:"8px 0 0",fontSize:12,color:"#4A6075"}}>
+                <p style={{margin:"8px 0 0",fontSize:12,color:"#909C92"}}>
                   Route built closest-to-closest from here
                 </p>
               </div>
@@ -1004,7 +1004,7 @@ State`}
               {/* Tier builder */}
               <div style={card}>
                 <span style={lbl}>Lead Tiers</span>
-                <p style={{fontSize:12,color:"#4A6075",marginBottom:14}}>
+                <p style={{fontSize:12,color:"#909C92",marginBottom:14}}>
                   Tiers auto-update daily — a home moves from Tier 1 to Tier 2 automatically as time passes.
                   Toggle on/off, rename, click color circle to change.
                 </p>
@@ -1012,13 +1012,13 @@ State`}
                   {TIER_WINDOWS.map((win,i) => {
                     const t=tiers[i];
                     return (
-                      <div key={win.id} style={{background:t.enabled?"#080E14":"#060A0F",
-                        border:`2px solid ${t.enabled?t.color:"#1E2D3D"}`,
+                      <div key={win.id} style={{background:t.enabled?"#E7EBE2":"#E0E5DA",
+                        border:`2px solid ${t.enabled?t.color:"#CFD6C7"}`,
                         borderRadius:12,padding:"12px 14px",opacity:t.enabled?1:0.5}}>
                         <div style={{display:"flex",alignItems:"center",gap:12}}>
                           <div onClick={()=>{const n=[...tiers];n[i]={...n[i],enabled:!n[i].enabled};setTiers(n);}}
                             style={{width:40,height:22,borderRadius:11,cursor:"pointer",flexShrink:0,
-                              background:t.enabled?"#27AE60":"#2A3D50",position:"relative"}}>
+                              background:t.enabled?"#27AE60":"#C2C9B9",position:"relative"}}>
                             <div style={{position:"absolute",top:3,left:t.enabled?20:3,
                               width:16,height:16,borderRadius:"50%",background:"white",transition:"left 0.15s"}}/>
                           </div>
@@ -1027,26 +1027,26 @@ State`}
                             style={{width:22,height:22,borderRadius:"50%",background:t.color,
                               cursor:"pointer",border:"2px solid rgba(255,255,255,0.3)",flexShrink:0}}
                             title="Click to change color"/>
-                          <span style={{fontSize:12,fontWeight:700,color:t.enabled?t.color:"#4A6075",
+                          <span style={{fontSize:12,fontWeight:700,color:t.enabled?t.color:"#909C92",
                             minWidth:70}}>{win.range}</span>
                           <input value={t.name}
                             onChange={e=>{const n=[...tiers];n[i]={...n[i],name:e.target.value};setTiers(n);}}
                             disabled={!t.enabled}
-                            style={{flex:1,background:"#0D1520",border:"1px solid #2A3D50",borderRadius:8,
-                              color:"white",padding:"6px 10px",fontSize:14,outline:"none"}}/>
+                            style={{flex:1,background:"#F0F3EB",border:"1px solid #C2C9B9",borderRadius:8,
+                              color:"#222A24",padding:"6px 10px",fontSize:14,outline:"none"}}/>
                         </div>
                       </div>
                     );
                   })}
-                  <div style={{background:"#060A0F",borderRadius:10,padding:"10px 14px",
-                    border:"1px solid #1E2D3D",fontSize:13,color:"#4A6075"}}>
+                  <div style={{background:"#E0E5DA",borderRadius:10,padding:"10px 14px",
+                    border:"1px solid #CFD6C7",fontSize:13,color:"#909C92"}}>
                     🔵 12+ months — included but unlabeled
                   </div>
                 </div>
                 {/* Live preview */}
-                <div style={{marginTop:12,background:"#080E14",borderRadius:10,
-                  padding:"10px 14px",border:"1px solid #2A3D50"}}>
-                  <span style={{fontSize:11,color:"#4A6075",marginRight:8}}>Preview:</span>
+                <div style={{marginTop:12,background:"#E7EBE2",borderRadius:10,
+                  padding:"10px 14px",border:"1px solid #C2C9B9"}}>
+                  <span style={{fontSize:11,color:"#909C92",marginRight:8}}>Preview:</span>
                   {tiers.filter(t=>t.enabled).map(t=>(
                     <span key={t.id} style={{marginRight:8,fontSize:11,fontWeight:700,color:t.color,
                       background:t.color+"22",border:`1px solid ${t.color}44`,
@@ -1055,55 +1055,55 @@ State`}
                 </div>
               </div>
 
-              {genErr&&<div style={{background:"#2B0A0A",border:"1px solid #C0392B",
-                borderRadius:10,padding:"12px 16px",fontSize:14,color:"#FF6B6B"}}>{genErr}</div>}
+              {genErr&&<div style={{background:"#FBE4DF",border:"1px solid #C0392B",
+                borderRadius:10,padding:"12px 16px",fontSize:14,color:"#D24F3D"}}>{genErr}</div>}
 
               {genResult?(
                 <div style={{display:"grid",gap:12}}>
-                  <div style={{background:"#0D2B1A",border:"1px solid #27AE60",borderRadius:14,
+                  <div style={{background:"#D8ECDF",border:"1px solid #27AE60",borderRadius:14,
                     padding:18,display:"flex",alignItems:"center",gap:14}}>
                     <div style={{width:44,height:44,background:"#27AE60",borderRadius:"50%",
                       display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>✓</div>
                     <div>
                       <div style={{fontWeight:800,fontSize:16}}>{genResult.label}</div>
-                      <div style={{color:"#7A8FA6",fontSize:13,marginTop:2}}>
+                      <div style={{color:"#5B675D",fontSize:13,marginTop:2}}>
                         {genResult.total_stops} homes · {genResult.pages} pages
                       </div>
                     </div>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
                     <button onClick={()=>dlFile(genResult.pdf_b64,genResult.label+".pdf","application/pdf")}
-                      style={{background:"#2B0A0A",border:"1px solid #C0392B",borderRadius:12,
+                      style={{background:"#FBE4DF",border:"1px solid #C0392B",borderRadius:12,
                         padding:"16px 8px",cursor:"pointer",textAlign:"center"}}>
                       <div style={{fontSize:26,marginBottom:4}}>📄</div>
                       <div style={{fontWeight:700,fontSize:13,color:"#E74C3C"}}>PDF</div>
-                      <div style={{fontSize:10,color:"#7A8FA6",marginTop:2}}>Print-ready</div>
+                      <div style={{fontSize:10,color:"#5B675D",marginTop:2}}>Print-ready</div>
                     </button>
                     <button onClick={()=>dlFile(genResult.csv_b64,genResult.label+".csv","text/csv")}
-                      style={{background:"#0A2B16",border:"1px solid #27AE60",borderRadius:12,
+                      style={{background:"#D8ECDF",border:"1px solid #27AE60",borderRadius:12,
                         padding:"16px 8px",cursor:"pointer",textAlign:"center"}}>
                       <div style={{fontSize:26,marginBottom:4}}>📊</div>
                       <div style={{fontWeight:700,fontSize:13,color:"#27AE60"}}>CSV</div>
-                      <div style={{fontSize:10,color:"#7A8FA6",marginTop:2}}>Route planner</div>
+                      <div style={{fontSize:10,color:"#5B675D",marginTop:2}}>Route planner</div>
                     </button>
                     <button onClick={()=>{
                       loadDriveRoute(genResult.route_id).then(()=>setTab("drive"));
-                    }} style={{background:"#1A2800",border:"1px solid #7BC818",borderRadius:12,
+                    }} style={{background:"#EEE2CA",border:"1px solid #7BC818",borderRadius:12,
                       padding:"16px 8px",cursor:"pointer",textAlign:"center"}}>
                       <div style={{fontSize:26,marginBottom:4}}>🚗</div>
                       <div style={{fontWeight:700,fontSize:13,color:"#7BC818"}}>Drive</div>
-                      <div style={{fontSize:10,color:"#7A8FA6",marginTop:2}}>Start now</div>
+                      <div style={{fontSize:10,color:"#5B675D",marginTop:2}}>Start now</div>
                     </button>
                   </div>
                   <button onClick={()=>setGenResult(null)}
-                    style={{background:"transparent",border:"1px solid #1E2D3D",borderRadius:12,
-                      color:"#7A8FA6",fontSize:14,padding:"13px 0",cursor:"pointer",fontWeight:600}}>
+                    style={{background:"transparent",border:"1px solid #CFD6C7",borderRadius:12,
+                      color:"#5B675D",fontSize:14,padding:"13px 0",cursor:"pointer",fontWeight:600}}>
                     ← Generate Another
                   </button>
                 </div>
               ):(
                 <button onClick={generate} disabled={loading}
-                  style={{background:loading?"#2A3D50":"linear-gradient(135deg,#27AE60,#1E8449)",
+                  style={{background:loading?"#C2C9B9":"linear-gradient(135deg,#27AE60,#1E8449)",
                     border:"none",borderRadius:14,color:"white",fontWeight:800,
                     fontSize:16,padding:"16px 0",cursor:loading?"default":"pointer"}}>
                   {loading?"⏳  Building your route…":"⚡  Generate Knock List"}
@@ -1120,21 +1120,21 @@ State`}
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
               <div>
                 <h2 style={{fontSize:22,fontWeight:800,margin:0}}>Excluded Homes</h2>
-                <p style={{color:"#7A8FA6",fontSize:13,margin:"4px 0 0"}}>
+                <p style={{color:"#5B675D",fontSize:13,margin:"4px 0 0"}}>
                   {excluded.length>0
                     ? `${excluded.length} home${excluded.length>1?"s":""} kept off your lists`
                     : "Nothing excluded yet"}
                 </p>
               </div>
-              <button onClick={loadExcluded} style={{background:"#1E2D3D",border:"none",
-                borderRadius:10,color:"#7A8FA6",padding:"8px 11px",cursor:"pointer",fontSize:15}}>↻</button>
+              <button onClick={loadExcluded} style={{background:"#CFD6C7",border:"none",
+                borderRadius:10,color:"#5B675D",padding:"8px 11px",cursor:"pointer",fontSize:15}}>↻</button>
             </div>
-            <p style={{color:"#4A6075",fontSize:12,margin:"10px 0 16px",lineHeight:1.45}}>
+            <p style={{color:"#909C92",fontSize:12,margin:"10px 0 16px",lineHeight:1.45}}>
               Homes you marked "Not Interested" or "Already Has Solar" are automatically left off new lists.
               Restore one to let it show up again.
             </p>
             {excluded.length===0?(
-              <div style={{...card,textAlign:"center",color:"#4A6075",padding:"38px 20px",fontSize:13,lineHeight:1.5}}>
+              <div style={{...card,textAlign:"center",color:"#909C92",padding:"38px 20px",fontSize:13,lineHeight:1.5}}>
                 No excluded homes yet. When you mark a door "Not Interested" or
                 "Already Has Solar" in Drive, it lands here.
               </div>
@@ -1142,13 +1142,13 @@ State`}
               <div key={i} style={{...card,display:"flex",alignItems:"flex-start",gap:12,marginBottom:10}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:700,fontSize:14,marginBottom:3}}>{h.full_address||h.address}</div>
-                  {h.owner&&<div style={{fontSize:12,color:"#7A8FA6",marginBottom:6}}>{h.owner}</div>}
+                  {h.owner&&<div style={{fontSize:12,color:"#5B675D",marginBottom:6}}>{h.owner}</div>}
                   <span style={{fontSize:11,fontWeight:600,
                     color:h.outcome==="Already Has Solar"?"#F5A623":h.outcome==="Not Qualified"?"#D68910":"#E74C3C",
-                    background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                    background:"#EDEFEA",border:"1px solid #CFD6C7",borderRadius:6,padding:"3px 8px"}}>
                     {h.outcome}
                   </span>
-                  {h.note&&<div style={{fontSize:12,color:"#7A8FA6",marginTop:7,fontStyle:"italic"}}>"{h.note}"</div>}
+                  {h.note&&<div style={{fontSize:12,color:"#5B675D",marginTop:7,fontStyle:"italic"}}>"{h.note}"</div>}
                 </div>
                 <button onClick={()=>restoreHome(h.address)} disabled={exBusy===h.address}
                   style={{background:"transparent",border:"1px solid #27AE60",borderRadius:8,
@@ -1170,13 +1170,13 @@ State`}
 
       {/* Bottom Tab Bar */}
       <div style={{position:"fixed",bottom:0,left:0,right:0,
-        background:"#0A1118",borderTop:`1px solid ${C.border}`,
+        background:"#EDEFEA",borderTop:`1px solid ${C.border}`,
         display:"flex",zIndex:200,paddingBottom:"env(safe-area-inset-bottom)"}}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
             style={{flex:1,background:"transparent",border:"none",
               padding:"10px 0 12px",cursor:"pointer",position:"relative",
-              color:tab===t.id?(t.green?"#27AE60":"#F5A623"):"#4A6075"}}>
+              color:tab===t.id?(t.green?"#27AE60":"#F5A623"):"#909C92"}}>
             <div style={{fontSize:22}}>{t.icon}</div>
             <div style={{fontSize:10,fontWeight:600,marginTop:2}}>{t.label}</div>
             {t.badge>0&&(
@@ -1240,7 +1240,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
   const total       = stops.length;
   const pct         = total>0?Math.round(completed/total*100):0;
 
-  const tierColor = (k) => tiers.find(t=>t.key===k)?.color || "#7A8FA6";
+  const tierColor = (k) => tiers.find(t=>t.key===k)?.color || "#5B675D";
   const tierName  = (k) => tiers.find(t=>t.key===k)?.name  || k;
 
   const doComplete = async (selectedOutcome) => {
@@ -1288,9 +1288,9 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     } catch(e){} finally{setSaving(false);}
   };
 
-  const C={bg:"#080E14",card:"#0D1520",border:"#1E2D3D"};
-  const inp={width:"100%",background:"#080E14",border:"1px solid #2A3D50",borderRadius:10,
-    color:"white",padding:"12px 14px",fontSize:15,outline:"none",boxSizing:"border-box"};
+  const C={bg:"#E7EBE2",card:"#F0F3EB",border:"#CFD6C7"};
+  const inp={width:"100%",background:"#E7EBE2",border:"1px solid #C2C9B9",borderRadius:10,
+    color:"#222A24",padding:"12px 14px",fontSize:15,outline:"none",boxSizing:"border-box"};
 
   const saveRename = async (id) => {
     const name=editLabel.trim();
@@ -1320,20 +1320,20 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     return (
     <div style={{display:"grid",gap:12}}>
       <div style={{display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={onBack} style={{background:"#1E2D3D",border:"none",borderRadius:8,
-          color:"#7A8FA6",fontSize:13,padding:"8px 14px",cursor:"pointer"}}>← Back</button>
+        <button onClick={onBack} style={{background:"#CFD6C7",border:"none",borderRadius:8,
+          color:"#5B675D",fontSize:13,padding:"8px 14px",cursor:"pointer"}}>← Back</button>
         <h2 style={{fontSize:20,fontWeight:800,margin:0}}>Drive Mode</h2>
       </div>
       {hiddenCount>0&&(
         <button onClick={()=>setShowHidden(h=>!h)}
           style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,
-            color:"#7A8FA6",fontSize:12,fontWeight:600,padding:"6px 12px",cursor:"pointer",justifySelf:"start"}}>
+            color:"#5B675D",fontSize:12,fontWeight:600,padding:"6px 12px",cursor:"pointer",justifySelf:"start"}}>
           {showHidden?`Hide ${hiddenCount} hidden`:`Show ${hiddenCount} hidden`}
         </button>
       )}
       {visibleRoutes.length===0?(
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,
-          padding:40,textAlign:"center",color:"#4A6075"}}>
+          padding:40,textAlign:"center",color:"#909C92"}}>
           {routes.length===0?"Generate a list first, then come back to drive it.":"No routes to show."}
         </div>
       ):visibleRoutes.map(r=>{
@@ -1354,20 +1354,20 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                 style={{background:"#27AE60",border:"none",borderRadius:8,color:"white",
                   fontWeight:700,fontSize:13,padding:"8px 12px",cursor:"pointer"}}>Save</button>
               <button onClick={()=>setEditingId(null)}
-                style={{background:"#1E2D3D",border:"none",borderRadius:8,color:"#7A8FA6",
+                style={{background:"#CFD6C7",border:"none",borderRadius:8,color:"#5B675D",
                   fontSize:13,padding:"8px 10px",cursor:"pointer"}}>✕</button>
             </div>
           ):(<>
             <div style={{flex:1,cursor:"pointer",minWidth:0}} onClick={()=>loadDriveRoute(r.id)}>
               <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:0}}>
+              <div style={{fontSize:12,color:"#909C92",marginTop:2,marginBottom:0}}>
                 {r.completed}/{r.total} done · {r.pct}%{r.created_at?` · ${r.created_at}`:""}
               </div>
               {showCount>0&&(
                 <div style={{marginTop:7}}>
                   <button onClick={(e)=>{e.stopPropagation();toggleWin(r.id);}}
                     style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",
-                      color:"#7A8FA6",fontSize:10,fontWeight:700,textTransform:"uppercase",
+                      color:"#5B675D",fontSize:10,fontWeight:700,textTransform:"uppercase",
                       letterSpacing:"1px",cursor:"pointer",padding:0}}>
                     <span style={{display:"inline-block",transition:"transform 0.15s",
                       transform:winOpen[r.id]?"rotate(90deg)":"none",fontSize:12,lineHeight:1}}>▸</span>
@@ -1379,15 +1379,15 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                         const label=typeof w==="string"?w:(w.label||"");
                         const range=(w&&typeof w==="object")?fmtRange(w.from,w.to):"";
                         return (
-                          <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
-                            border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                          <span key={i} style={{fontSize:11,color:"#5B675D",background:"#EDEFEA",
+                            border:"1px solid #CFD6C7",borderRadius:6,padding:"3px 8px"}}>
                             📅 {label}{range?` · ${range}`:""}
                           </span>
                         );
                       }) : tcfg.map((t,i)=>(
                         <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,
-                          color:"#B0C4D4",background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
-                          <span style={{width:8,height:8,borderRadius:"50%",background:t.color||"#7A8FA6",flexShrink:0}}/>
+                          color:"#5B675D",background:"#EDEFEA",border:"1px solid #CFD6C7",borderRadius:6,padding:"3px 8px"}}>
+                          <span style={{width:8,height:8,borderRadius:"50%",background:t.color||"#5B675D",flexShrink:0}}/>
                           {t.name}{t.range?` · ${t.range}`:""}
                         </span>
                       ))}
@@ -1397,10 +1397,10 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               )}
             </div>
             <button onClick={()=>{setEditingId(r.id);setEditLabel(r.label);}} title="Rename"
-              style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
+              style={{background:"transparent",border:"none",color:"#5B675D",fontSize:16,
                 padding:"6px",cursor:"pointer"}}>✏️</button>
             <button onClick={()=>toggleHide(r)} disabled={rowBusy===r.id} title={r.hidden?"Unhide":"Hide"}
-              style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
+              style={{background:"transparent",border:"none",color:"#5B675D",fontSize:16,
                 padding:"6px",cursor:"pointer"}}>{r.hidden?"👁":"🙈"}</button>
             <button onClick={()=>deleteRoute(r)} disabled={rowBusy===r.id} title="Delete"
               style={{background:"transparent",border:"none",color:"#C0392B",fontSize:15,
@@ -1421,7 +1421,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     <div style={{display:"grid",gap:10}}>
       {/* Back to route list */}
       <button onClick={()=>setDriveRoute(null)}
-        style={{background:"#1E2D3D",border:"none",borderRadius:8,color:"#7A8FA6",
+        style={{background:"#CFD6C7",border:"none",borderRadius:8,color:"#5B675D",
           fontSize:13,fontWeight:600,padding:"8px 14px",cursor:"pointer",justifySelf:"start"}}>
         ← Routes
       </button>
@@ -1430,9 +1430,9 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
           <span style={{fontSize:13,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",
             whiteSpace:"nowrap",maxWidth:"60%"}}>{route.label}</span>
-          <span style={{fontSize:12,color:"#7A8FA6"}}>{completed}/{total} · {pct}%</span>
+          <span style={{fontSize:12,color:"#5B675D"}}>{completed}/{total} · {pct}%</span>
         </div>
-        <div style={{height:6,background:"#1E2D3D",borderRadius:3,overflow:"hidden"}}>
+        <div style={{height:6,background:"#CFD6C7",borderRadius:3,overflow:"hidden"}}>
           <div style={{height:"100%",width:`${pct}%`,
             background:"linear-gradient(90deg,#27AE60,#7BC818)",transition:"width 0.4s"}}/>
         </div>
@@ -1440,25 +1440,25 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
 
       {/* Nav pref */}
       <div style={{display:"flex",gap:8,alignItems:"center"}}>
-        <span style={{fontSize:12,color:"#4A6075",flexShrink:0}}>Nav:</span>
-        <div style={{display:"flex",background:"#0A1118",borderRadius:8,padding:3,
+        <span style={{fontSize:12,color:"#909C92",flexShrink:0}}>Nav:</span>
+        <div style={{display:"flex",background:"#EDEFEA",borderRadius:8,padding:3,
           border:`1px solid ${C.border}`,flex:1}}>
           {[["waze","🚗 Waze"],["google","🗺 Google"]].map(([k,l])=>(
             <button key={k} onClick={()=>setNav(k)}
-              style={{flex:1,padding:"8px 0",background:navPref===k?"#1E2D3D":"transparent",
-                border:"none",borderRadius:6,color:navPref===k?"white":"#4A6075",
+              style={{flex:1,padding:"8px 0",background:navPref===k?"#CFD6C7":"transparent",
+                border:"none",borderRadius:6,color:navPref===k?"white":"#909C92",
                 fontSize:13,fontWeight:600,cursor:"pointer"}}>{l}</button>
           ))}
         </div>
       </div>
 
       {/* View tabs */}
-      <div style={{display:"flex",background:"#0A1118",borderRadius:10,padding:4,
+      <div style={{display:"flex",background:"#EDEFEA",borderRadius:10,padding:4,
         border:`1px solid ${C.border}`}}>
         {VIEWS.map(([v,l])=>(
           <button key={v} onClick={()=>setView(v)}
-            style={{flex:1,padding:"9px 0",background:view===v?"#1E2D3D":"transparent",
-              border:"none",borderRadius:7,color:view===v?"white":"#4A6075",
+            style={{flex:1,padding:"9px 0",background:view===v?"#CFD6C7":"transparent",
+              border:"none",borderRadius:7,color:view===v?"white":"#909C92",
               fontSize:12,fontWeight:600,cursor:"pointer"}}>{l}</button>
         ))}
       </div>
@@ -1469,14 +1469,14 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           <div style={{background:C.card,border:`2px solid ${tierColor(currentStop.tier_key)}`,
             borderRadius:16,padding:18}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-              <span style={{background:"#1E2D3D",borderRadius:8,padding:"4px 12px",
+              <span style={{background:"#CFD6C7",borderRadius:8,padding:"4px 12px",
                 fontSize:13,fontWeight:700}}>Stop {currentStop.stop_num}</span>
               <TierBadge name={tierName(currentStop.tier_key)} color={tierColor(currentStop.tier_key)}/>
             </div>
             <div style={{fontSize:20,fontWeight:800,lineHeight:1.2,marginBottom:4}}>
               {currentStop.address}
             </div>
-            <div style={{fontSize:14,color:"#7A8FA6",marginBottom:16}}>
+            <div style={{fontSize:14,color:"#5B675D",marginBottom:16}}>
               {currentStop.owner} · Moved in {currentStop.sale_date}
             </div>
 
@@ -1499,7 +1499,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               style={{...inp,marginBottom:12}}/>
 
             {/* Outcome buttons */}
-            <div style={{fontSize:11,color:"#4A6075",textTransform:"uppercase",
+            <div style={{fontSize:11,color:"#909C92",textTransform:"uppercase",
               letterSpacing:"1px",marginBottom:10,fontWeight:600}}>Select outcome</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
               {OUTCOMES.map(({key,emoji,color})=>{
@@ -1510,7 +1510,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                     style={{padding:"16px 8px",borderRadius:12,
                       border:`2px solid ${isSelected?color:color+"44"}`,
                       background:isSelected?`${color}35`:`${color}10`,
-                      color:isSelected?"white":"#B0C4D4",
+                      color:isSelected?"white":"#5B675D",
                       fontSize:14,fontWeight:700,cursor:"pointer",
                       textAlign:"center",
                       transform:isSelected?"scale(1.03)":"scale(1)",
@@ -1527,7 +1527,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
 
             {/* Not Qualified reasons */}
             {outcome==="Not Qualified" && (
-              <div style={{background:"#1A1206",border:"1px solid #5A4419",borderRadius:12,
+              <div style={{background:"#EEE2CA",border:"1px solid #E8CF9A",borderRadius:12,
                 padding:"13px 14px",marginBottom:12}}>
                 <div style={{fontSize:11,color:"#D68910",textTransform:"uppercase",
                   letterSpacing:"1px",fontWeight:700,marginBottom:10}}>Why not qualified?</div>
@@ -1538,14 +1538,14 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                       <button key={r} onClick={()=>setNqReasons(on?nqReasons.filter(x=>x!==r):[...nqReasons,r])}
                         disabled={submitting}
                         style={{padding:"9px 15px",borderRadius:20,cursor:"pointer",fontSize:13,fontWeight:700,
-                          border:`1.5px solid ${on?"#F5A623":"#5A4419"}`,
-                          background:on?"#F5A62333":"transparent",color:on?"#FFB23E":"#B0C4D4"}}>
+                          border:`1.5px solid ${on?"#F5A623":"#E8CF9A"}`,
+                          background:on?"#F5A62333":"transparent",color:on?"#FFB23E":"#5B675D"}}>
                         {on?"✓ ":""}{r}
                       </button>
                     );
                   })}
                 </div>
-                <div style={{fontSize:11,color:"#7A8FA6",marginTop:10}}>
+                <div style={{fontSize:11,color:"#5B675D",marginTop:10}}>
                   Pick any that apply — add detail in the note below if you want.
                 </div>
               </div>
@@ -1553,7 +1553,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
 
             {/* Appointment Set — schedule + add to calendar */}
             {outcome==="Appointment Set" && (
-              <div style={{background:"#06140C",border:"1px solid #1E5631",borderRadius:12,
+              <div style={{background:"#D8ECDF",border:"1px solid #1E5631",borderRadius:12,
                 padding:"13px 14px",marginBottom:12}}>
                 <div style={{fontSize:11,color:"#27AE60",textTransform:"uppercase",
                   letterSpacing:"1px",fontWeight:700,marginBottom:10}}>Appointment time</div>
@@ -1561,17 +1561,17 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                   style={{...inp,marginBottom:10,colorScheme:"dark"}}/>
                 <div style={{display:"flex",gap:8}}>
                   <button disabled={!apptTime} onClick={()=>window.open(googleCalUrl(currentStop,apptTime),"_blank")}
-                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #2A3D50",
+                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #C2C9B9",
                       cursor:apptTime?"pointer":"default",
-                      background:apptTime?"#13241B":"#0D1520",color:apptTime?"#EAF2EC":"#4A6075",
+                      background:apptTime?"#D8ECDF":"#F0F3EB",color:apptTime?"#EAF2EC":"#909C92",
                       fontWeight:700,fontSize:13}}>📅 Google Calendar</button>
                   <button disabled={!apptTime} onClick={()=>downloadIcs(currentStop,apptTime)}
-                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #2A3D50",
+                    style={{flex:1,padding:"11px 0",borderRadius:10,border:"1px solid #C2C9B9",
                       cursor:apptTime?"pointer":"default",
-                      background:apptTime?"#13241B":"#0D1520",color:apptTime?"#EAF2EC":"#4A6075",
+                      background:apptTime?"#D8ECDF":"#F0F3EB",color:apptTime?"#EAF2EC":"#909C92",
                       fontWeight:700,fontSize:13}}>📆 Apple Calendar</button>
                 </div>
-                <div style={{fontSize:11,color:"#7A8FA6",marginTop:9}}>
+                <div style={{fontSize:11,color:"#5B675D",marginTop:9}}>
                   Pick a time, tap your calendar to add it, then log the outcome. The time is saved with this stop too.
                 </div>
               </div>
@@ -1580,8 +1580,8 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
             {/* Submit button — only active when outcome selected */}
             <button onClick={()=>doComplete()} disabled={!outcome||submitting}
               style={{width:"100%",marginBottom:12,
-                background:outcome?"linear-gradient(135deg,#27AE60,#1E8449)":"#1E2D3D",
-                border:"none",borderRadius:14,color:outcome?"white":"#4A6075",
+                background:outcome?"linear-gradient(135deg,#27AE60,#1E8449)":"#CFD6C7",
+                border:"none",borderRadius:14,color:outcome?"white":"#909C92",
                 fontWeight:800,fontSize:16,padding:"16px 0",cursor:outcome?"pointer":"default",
                 transition:"all 0.2s",
                 boxShadow:outcome?"0 4px 20px rgba(39,174,96,0.35)":"none"}}>
@@ -1593,8 +1593,8 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               style={{...inp,marginBottom:12}}/>
 
             <button onClick={doSkip} disabled={submitting}
-              style={{width:"100%",background:"transparent",border:"1px solid #2A3D50",
-                borderRadius:12,color:"#7A8FA6",fontSize:14,padding:"13px 0",cursor:"pointer",fontWeight:600}}>
+              style={{width:"100%",background:"transparent",border:"1px solid #C2C9B9",
+                borderRadius:12,color:"#5B675D",fontSize:14,padding:"13px 0",cursor:"pointer",fontWeight:600}}>
               Skip this stop →
             </button>
           </div>
@@ -1603,24 +1603,24 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           {stops.filter(s=>s.status==="pending"&&s.stop_num!==currentStop.stop_num).slice(0,2).map(s=>(
             <div key={s.stop_num} style={{background:C.card,border:`1px solid ${C.border}`,
               borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
-              <span style={{fontSize:11,fontWeight:700,color:"#4A6075",
-                background:"#1E2D3D",borderRadius:6,padding:"3px 9px",flexShrink:0}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#909C92",
+                background:"#CFD6C7",borderRadius:6,padding:"3px 9px",flexShrink:0}}>
                 Next #{s.stop_num}
               </span>
               <span style={{width:10,height:10,borderRadius:"50%",background:tierColor(s.tier_key),flexShrink:0}}/>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.address}</div>
-                <div style={{fontSize:11,color:"#4A6075"}}>{s.owner}</div>
+                <div style={{fontSize:11,color:"#909C92"}}>{s.owner}</div>
               </div>
             </div>
           ))}
 
           {completed===total&&total>0&&(
-            <div style={{background:"#0D2B1A",border:"1px solid #27AE60",borderRadius:14,
+            <div style={{background:"#D8ECDF",border:"1px solid #27AE60",borderRadius:14,
               padding:28,textAlign:"center"}}>
               <div style={{fontSize:36,marginBottom:8}}>🎉</div>
               <div style={{fontWeight:800,fontSize:18}}>Route Complete!</div>
-              <div style={{color:"#7A8FA6",fontSize:14,marginTop:4}}>{completed} stops knocked today</div>
+              <div style={{color:"#5B675D",fontSize:14,marginTop:4}}>{completed} stops knocked today</div>
             </div>
           )}
         </div>
@@ -1629,7 +1629,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
       {/* ── ALL STOPS ── */}
       {view==="list"&&(
         <div style={{display:"grid",gap:8}}>
-          <div style={{fontSize:12,color:"#4A6075",marginBottom:4}}>
+          <div style={{fontSize:12,color:"#909C92",marginBottom:4}}>
             {completed} done · {stops.filter(s=>s.status==="skipped").length} skipped · {stops.filter(s=>s.status==="pending").length} remaining
           </div>
           {stops.map(s=>{
@@ -1638,13 +1638,13 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
             const isSkipped=s.status==="skipped";
             return (
               <div key={s.stop_num} onClick={()=>{ if(isDone) openEdit(s); else startHere(s.stop_num); }}
-                style={{background:isCurrent?"#0D2B1A":isDone?"#0A1118":isSkipped?"#060A0F":C.card,
-                  border:`1px solid ${isCurrent?"#27AE60":isDone?"#1E3D26":"#1E2D3D"}`,
+                style={{background:isCurrent?"#D8ECDF":isDone?"#EDEFEA":isSkipped?"#E0E5DA":C.card,
+                  border:`1px solid ${isCurrent?"#27AE60":isDone?"#D8ECDF":"#CFD6C7"}`,
                   borderRadius:12,padding:"12px 16px",cursor:"pointer",
                   opacity:isSkipped?0.4:1}}>
                 <div style={{display:"flex",alignItems:"center",gap:12}}>
-                  <span style={{fontSize:12,fontWeight:700,color:isCurrent?"#27AE60":"#4A6075",
-                    background:"#1E2D3D",borderRadius:6,padding:"3px 9px",
+                  <span style={{fontSize:12,fontWeight:700,color:isCurrent?"#27AE60":"#909C92",
+                    background:"#CFD6C7",borderRadius:6,padding:"3px 9px",
                     flexShrink:0,minWidth:32,textAlign:"center"}}>{s.stop_num}</span>
                   <span style={{width:10,height:10,borderRadius:"50%",
                     background:tierColor(s.tier_key),flexShrink:0}}/>
@@ -1655,11 +1655,11 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                       {s.address}
                     </div>
                     <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
-                      <span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>
-                      <span style={{fontSize:11,color:"#4A6075"}}>·</span>
-                      <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {s.sale_date}</span>
+                      <span style={{fontSize:11,color:"#909C92"}}>{s.owner}</span>
+                      <span style={{fontSize:11,color:"#909C92"}}>·</span>
+                      <span style={{fontSize:11,color:"#5B675D"}}>📅 {s.sale_date}</span>
                       {isDone&&s.outcome&&<>
-                        <span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                        <span style={{fontSize:11,color:"#909C92"}}>·</span>
                         <span style={{fontSize:11,fontWeight:700,
                           color:OUTCOMES.find(o=>o.key===s.outcome)?.color||"#27AE60"}}>
                           {s.outcome}
@@ -1669,10 +1669,10 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                   </div>
                   {isDone&&<span style={{fontSize:11,color:"#27AE60",fontWeight:700,flexShrink:0}}>✏️</span>}
                   {isCurrent&&<span style={{fontSize:11,color:"#27AE60",fontWeight:700}}>← NOW</span>}
-                  {!isDone&&!isCurrent&&<span style={{fontSize:11,color:"#4A6075",fontWeight:700,flexShrink:0}}>Start ›</span>}
+                  {!isDone&&!isCurrent&&<span style={{fontSize:11,color:"#909C92",fontWeight:700,flexShrink:0}}>Start ›</span>}
                 </div>
-                {isDone&&s.phone&&<div style={{fontSize:11,color:"#4A6075",marginTop:4,paddingLeft:52}}>📱 {s.phone}</div>}
-                {isDone&&s.note&&<div style={{fontSize:11,color:"#7A8FA6",marginTop:2,paddingLeft:52,fontStyle:"italic"}}>"{s.note}"</div>}
+                {isDone&&s.phone&&<div style={{fontSize:11,color:"#909C92",marginTop:4,paddingLeft:52}}>📱 {s.phone}</div>}
+                {isDone&&s.note&&<div style={{fontSize:11,color:"#5B675D",marginTop:2,paddingLeft:52,fontStyle:"italic"}}>"{s.note}"</div>}
               </div>
             );
           })}
@@ -1682,7 +1682,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
       {/* ── MAP ── */}
       {view==="map"&&(
         <div>
-          <p style={{fontSize:12,color:"#4A6075",marginBottom:10}}>
+          <p style={{fontSize:12,color:"#909C92",marginBottom:10}}>
             Tap any pin to see stop details and navigate. Color = tier. Grey = completed.
           </p>
           <MapView
@@ -1698,12 +1698,12 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
       {/* ── HISTORY ── */}
       {view==="history"&&(
         <div style={{display:"grid",gap:10}}>
-          <p style={{fontSize:12,color:"#4A6075",margin:0}}>
+          <p style={{fontSize:12,color:"#909C92",margin:0}}>
             Tap any stop to edit disposition, phone number, or notes.
           </p>
           {stops.filter(s=>s.status==="complete").length===0?(
             <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
-              padding:32,textAlign:"center",color:"#4A6075"}}>
+              padding:32,textAlign:"center",color:"#909C92"}}>
               No completed stops yet.
             </div>
           ):stops.filter(s=>s.status==="complete").map(s=>(
@@ -1711,24 +1711,24 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
               style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
                 padding:"14px 16px",cursor:"pointer"}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:s.phone||s.note?6:0}}>
-                <span style={{fontSize:11,background:"#1E2D3D",borderRadius:5,
-                  padding:"2px 8px",color:"#4A6075",flexShrink:0}}>{s.stop_num}</span>
+                <span style={{fontSize:11,background:"#CFD6C7",borderRadius:5,
+                  padding:"2px 8px",color:"#909C92",flexShrink:0}}>{s.stop_num}</span>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:700,overflow:"hidden",
                     textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.address}</div>
-                  <div style={{fontSize:11,color:"#4A6075"}}>{s.owner}</div>
+                  <div style={{fontSize:11,color:"#909C92"}}>{s.owner}</div>
                 </div>
                 <div style={{flexShrink:0,textAlign:"right"}}>
                   <div style={{fontSize:12,fontWeight:700,
-                    color:OUTCOMES.find(o=>o.key===s.outcome)?.color||"#7A8FA6"}}>
+                    color:OUTCOMES.find(o=>o.key===s.outcome)?.color||"#5B675D"}}>
                     {s.outcome||"—"}
                   </div>
-                  <div style={{fontSize:10,color:"#4A6075"}}>{s.completed_at}</div>
+                  <div style={{fontSize:10,color:"#909C92"}}>{s.completed_at}</div>
                 </div>
-                <span style={{color:"#4A6075",fontSize:14,flexShrink:0}}>✏️</span>
+                <span style={{color:"#909C92",fontSize:14,flexShrink:0}}>✏️</span>
               </div>
-              {s.phone&&<div style={{fontSize:12,color:"#7A8FA6",paddingLeft:44}}>📱 {s.phone}</div>}
-              {s.note&&<div style={{fontSize:12,color:"#7A8FA6",paddingLeft:44,fontStyle:"italic"}}>"{s.note}"</div>}
+              {s.phone&&<div style={{fontSize:12,color:"#5B675D",paddingLeft:44}}>📱 {s.phone}</div>}
+              {s.note&&<div style={{fontSize:12,color:"#5B675D",paddingLeft:44,fontStyle:"italic"}}>"{s.note}"</div>}
             </div>
           ))}
         </div>
@@ -1740,11 +1740,11 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"flex-end",zIndex:1000}}
           onClick={()=>setEditStop(null)}>
           <div onClick={e=>e.stopPropagation()}
-            style={{width:"100%",maxWidth:540,margin:"0 auto",background:"#0D1520",
-              borderRadius:"20px 20px 0 0",padding:"20px 18px 36px",border:"1px solid #1E2D3D"}}>
-            <div style={{width:44,height:5,background:"#2A3D50",borderRadius:3,margin:"0 auto 16px"}}/>
+            style={{width:"100%",maxWidth:540,margin:"0 auto",background:"#F0F3EB",
+              borderRadius:"20px 20px 0 0",padding:"20px 18px 36px",border:"1px solid #CFD6C7"}}>
+            <div style={{width:44,height:5,background:"#C2C9B9",borderRadius:3,margin:"0 auto 16px"}}/>
             <div style={{fontWeight:800,fontSize:16,marginBottom:3}}>{editStop.address}</div>
-            <div style={{fontSize:13,color:"#7A8FA6",marginBottom:16}}>{editStop.owner}</div>
+            <div style={{fontSize:13,color:"#5B675D",marginBottom:16}}>{editStop.owner}</div>
 
             <div style={{fontSize:11,color:"#F5A623",textTransform:"uppercase",
               letterSpacing:"1px",marginBottom:10,fontWeight:600}}>Disposition</div>
@@ -1754,7 +1754,7 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
                   style={{padding:"12px 8px",borderRadius:12,
                     border:`2px solid ${editData.outcome===key?color:color+"44"}`,
                     background:editData.outcome===key?`${color}28`:`${color}0A`,
-                    color:"white",fontSize:13,fontWeight:700,cursor:"pointer",textAlign:"center"}}>
+                    color:"#222A24",fontSize:13,fontWeight:700,cursor:"pointer",textAlign:"center"}}>
                   <div style={{fontSize:20,marginBottom:2}}>{emoji}</div>{key}
                 </button>
               ))}
@@ -1774,8 +1774,8 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:12}}>
               <button onClick={()=>setEditStop(null)}
-                style={{background:"transparent",border:"1px solid #2A3D50",borderRadius:12,
-                  color:"#7A8FA6",fontSize:14,padding:"14px 0",cursor:"pointer"}}>Cancel</button>
+                style={{background:"transparent",border:"1px solid #C2C9B9",borderRadius:12,
+                  color:"#5B675D",fontSize:14,padding:"14px 0",cursor:"pointer"}}>Cancel</button>
               <button onClick={saveEdit} disabled={saving}
                 style={{background:"linear-gradient(135deg,#27AE60,#1E8449)",border:"none",
                   borderRadius:12,color:"white",fontSize:14,fontWeight:800,
