@@ -1716,6 +1716,60 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
 // ══════════════════════════════════════════════════════════════════════
 // ADMIN DASHBOARD
 // ══════════════════════════════════════════════════════════════════════
+function AdminRouteDetail({route, onBack}) {
+  const C={card:"#0D1520",border:"#1E2D3D"};
+  const stops=route.stops||[];
+  const tierColor=(k)=>{const t=(route.tier_config||[]).find(x=>x.key===k);return t?.color||"#7A8FA6";};
+  const done=stops.filter(s=>s.status==="complete").length;
+  const skip=stops.filter(s=>s.status==="skipped").length;
+  const remaining=stops.filter(s=>s.status==="pending").length;
+  return (
+    <div style={{display:"grid",gap:10}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:2}}>
+        <button onClick={onBack}
+          style={{background:"#1E2D3D",border:"none",borderRadius:10,color:"#B0C4D4",
+            fontWeight:700,fontSize:13,padding:"9px 14px",cursor:"pointer",flexShrink:0}}>← Back</button>
+        <div style={{minWidth:0}}>
+          <div style={{fontWeight:800,fontSize:17,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{route.label}</div>
+          <div style={{fontSize:12,color:"#7A8FA6"}}>{route.rep_name} · {done} done · {skip} skipped · {remaining} left</div>
+        </div>
+      </div>
+      {stops.map(s=>{
+        const oc=OUTCOMES.find(o=>o.key===s.outcome);
+        const statusColor=s.status==="complete"?"#27AE60":s.status==="skipped"?"#7A8FA6":"#4A6075";
+        return (
+          <div key={s.stop_num} style={{background:C.card,
+            border:`1px solid ${s.status==="complete"?"#1E3D26":C.border}`,
+            borderRadius:12,padding:"12px 16px",opacity:s.status==="skipped"?0.55:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:12,fontWeight:700,color:statusColor,background:"#1E2D3D",
+                borderRadius:6,padding:"3px 9px",flexShrink:0,minWidth:32,textAlign:"center"}}>{s.stop_num}</span>
+              <span style={{width:10,height:10,borderRadius:"50%",background:tierColor(s.tier_key),flexShrink:0}}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",
+                  whiteSpace:"nowrap",textDecoration:s.status==="complete"?"line-through":"none"}}>{s.address}</div>
+                <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+                  {s.owner&&<span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>}
+                  {s.sale_date&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                    <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {s.sale_date}</span></>}
+                </div>
+              </div>
+              <div style={{textAlign:"right",flexShrink:0}}>
+                {s.status==="complete"&&s.outcome
+                  ? <span style={{fontSize:11,fontWeight:700,color:oc?.color||"#27AE60"}}>{s.outcome}</span>
+                  : <span style={{fontSize:11,fontWeight:600,color:statusColor}}>{s.status==="skipped"?"Skipped":"Pending"}</span>}
+                {s.completed_at&&<div style={{fontSize:10,color:"#4A6075",marginTop:2}}>{s.completed_at}</div>}
+              </div>
+            </div>
+            {s.phone&&<div style={{fontSize:11,color:"#4A6075",marginTop:5,paddingLeft:54}}>📱 {s.phone}</div>}
+            {s.note&&<div style={{fontSize:11,color:"#7A8FA6",marginTop:2,paddingLeft:54,fontStyle:"italic"}}>"{s.note}"</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function AdminDashboard({onLogout}) {
   const [requests, setRequests] = useState([]);
   const [routes,   setRoutes]   = useState([]);
@@ -1723,7 +1777,12 @@ function AdminDashboard({onLogout}) {
   const [tab,      setTab]      = useState("requests");
   const [uploading,setUploading]= useState(null);
   const [msgs,     setMsgs]     = useState({});
+  const [adminRoute,setAdminRoute]= useState(null);
   const fileRefs = useRef({});
+
+  const openRoute = async (id) => {
+    try { const d=await get(`/route/${id}`); setAdminRoute(d); } catch{}
+  };
 
   const load = async () => {
     try {
@@ -1733,6 +1792,12 @@ function AdminDashboard({onLogout}) {
     } catch{}
   };
   useEffect(()=>{load();const i=setInterval(load,10000);return()=>clearInterval(i);},[]);
+  useEffect(()=>{
+    if(!adminRoute) return;
+    const id=adminRoute.id;
+    const t=setInterval(async()=>{ try{const d=await get(`/route/${id}`); setAdminRoute(d); }catch{} },10000);
+    return ()=>clearInterval(t);
+  },[adminRoute?.id]);
 
   const fulfill=async(reqId,file)=>{
     // Detect .numbers files and show helpful message
@@ -1754,6 +1819,36 @@ function AdminDashboard({onLogout}) {
 
   const pending  =requests.filter(r=>r.status==="pending");
   const fulfilled=requests.filter(r=>r.status==="ready");
+  const liveRoutes=routes.filter(r=>((r.completed||0)+(r.skipped||0))>0);
+  const routeCard = (r) => {
+    const started=((r.completed||0)+(r.skipped||0))>0;
+    return (
+      <div key={r.id} onClick={()=>openRoute(r.id)} style={{...card,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5,flexWrap:"wrap"}}>
+              <span style={{fontFamily:"monospace",fontSize:10,color:"#4A6075",
+                background:"#1E2D3D",padding:"2px 6px",borderRadius:4}}>#{r.id}</span>
+              <span style={{fontWeight:700,fontSize:14}}>{r.rep_name}</span>
+              {started
+                ? <span style={{fontSize:11,color:"#27AE60",fontWeight:600}}>🟢 Active</span>
+                : <span style={{fontSize:11,color:"#4A6075",fontWeight:600}}>⚪ Not started</span>}
+            </div>
+            <div style={{fontSize:13,color:"#B0C4D4",marginBottom:8,overflow:"hidden",
+              textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.label}</div>
+            <div style={{height:6,background:"#1E2D3D",borderRadius:3,overflow:"hidden",maxWidth:300}}>
+              <div style={{height:"100%",width:`${r.pct}%`,
+                background:"linear-gradient(90deg,#27AE60,#7BC818)"}}/>
+            </div>
+          </div>
+          <div style={{textAlign:"right",flexShrink:0}}>
+            <div style={{fontSize:28,fontWeight:800,color:started?"#27AE60":"#4A6075"}}>{r.pct}%</div>
+            <div style={{fontSize:12,color:"#4A6075"}}>{r.completed}/{r.total}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
   const C={bg:"#080E14",card:"#0D1520",border:"#1E2D3D"};
   const card={background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:18};
 
@@ -1791,10 +1886,13 @@ function AdminDashboard({onLogout}) {
           ))}
         </div>
 
+        {adminRoute ? (
+          <AdminRouteDetail route={adminRoute} onBack={()=>setAdminRoute(null)}/>
+        ) : (<>
         {/* Tabs */}
         <div style={{display:"flex",background:"#0A1118",borderRadius:10,padding:4,
           border:`1px solid ${C.border}`,marginBottom:16}}>
-          {[["requests","Data Requests"],["routes","Live Routes"]].map(([t,l])=>(
+          {[["requests","Data Requests"],["routes","Routes Generated"],["live","Live Routes"]].map(([t,l])=>(
             <button key={t} onClick={()=>setTab(t)}
               style={{flex:1,padding:"9px 0",background:tab===t?"#1E2D3D":"transparent",
                 border:"none",borderRadius:7,color:tab===t?"white":"#4A6075",
@@ -1915,43 +2013,34 @@ function AdminDashboard({onLogout}) {
         {tab==="routes"&&(
           <div style={{display:"grid",gap:12}}>
             <p style={{color:"#4A6075",fontSize:13,margin:"0 0 4px"}}>
-              Live view of all active driving sessions.
+              All routes generated for reps. Tap one to see every stop.
             </p>
             {routes.length===0?(
               <div style={{...card,textAlign:"center",padding:32,color:"#4A6075"}}>
-                No active routes. Reps appear here when driving.
+                No routes generated yet.
               </div>
-            ):routes.map(r=>(
-              <div key={r.id} style={card}>
-                <div style={{display:"flex",alignItems:"center",gap:14}}>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
-                      <span style={{fontFamily:"monospace",fontSize:10,color:"#4A6075",
-                        background:"#1E2D3D",padding:"2px 6px",borderRadius:4}}>#{r.id}</span>
-                      <span style={{fontWeight:700,fontSize:14}}>{r.rep_name}</span>
-                      <span style={{fontSize:11,color:"#27AE60",fontWeight:600}}>🟢 Active</span>
-                    </div>
-                    <div style={{fontSize:13,color:"#B0C4D4",marginBottom:8}}>{r.label}</div>
-                    <div style={{height:6,background:"#1E2D3D",borderRadius:3,overflow:"hidden",maxWidth:300}}>
-                      <div style={{height:"100%",width:`${r.pct}%`,
-                        background:"linear-gradient(90deg,#27AE60,#7BC818)"}}/>
-                    </div>
-                  </div>
-                  <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontSize:28,fontWeight:800,color:"#27AE60"}}>{r.pct}%</div>
-                    <div style={{fontSize:12,color:"#4A6075"}}>{r.completed}/{r.total}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            ):routes.map(routeCard)}
           </div>
         )}
+        {tab==="live"&&(
+          <div style={{display:"grid",gap:12}}>
+            <p style={{color:"#4A6075",fontSize:13,margin:"0 0 4px"}}>
+              Routes reps are actively working right now. Tap one to follow along.
+            </p>
+            {liveRoutes.length===0?(
+              <div style={{...card,textAlign:"center",padding:32,color:"#4A6075"}}>
+                No live routes yet. Reps appear here once they start knocking.
+              </div>
+            ):liveRoutes.map(routeCard)}
+          </div>
+        )}
+        </>)}
       </div>
 
       {/* Bottom tab bar for admin */}
       <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#0A1118",
         borderTop:`1px solid ${C.border}`,display:"flex",zIndex:200}}>
-        {[["requests","📋","Requests"],["routes","🚗","Live Routes"]].map(([t,icon,l])=>(
+        {[["requests","📋","Requests"],["routes","🗂","Generated"],["live","🚗","Live"]].map(([t,icon,l])=>(
           <button key={t} onClick={()=>setTab(t)}
             style={{flex:1,background:"transparent",border:"none",padding:"10px 0 12px",
               cursor:"pointer",color:tab===t?"#F5A623":"#4A6075",position:"relative"}}>
