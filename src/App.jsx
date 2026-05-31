@@ -123,6 +123,36 @@ const StatusBadge = ({status}) => {
     borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{c.label}</span>;
 };
 
+const ZipDetail = ({zm, open, onToggle}) => {
+  if(!zm||!zm.length) return null;
+  return (
+    <div style={{marginTop:8}}>
+      <button onClick={onToggle}
+        style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",
+          color:"#7A8FA6",fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",
+          cursor:"pointer",padding:0}}>
+        <span style={{display:"inline-block",transition:"transform 0.15s",
+          transform:open?"rotate(90deg)":"none",fontSize:12,lineHeight:1}}>▸</span>
+        By ZIP ({zm.length})
+      </button>
+      {open&&(
+        <div style={{marginTop:6,background:"#0A1118",border:"1px solid #1E2D3D",
+          borderRadius:8,padding:"8px 10px",display:"grid",gap:5}}>
+          {zm.map(([z,m])=>(
+            <div key={z} style={{fontSize:12,color:"#7A8FA6",display:"flex",
+              gap:6,flexWrap:"wrap",alignItems:"baseline"}}>
+              <span style={{fontWeight:700,color:"#B0C4D4"}}>{z}{m.city?` · ${m.city}`:""}</span>
+              <span>·</span>
+              <span>{(m.count||0).toLocaleString()} homes</span>
+              {m.min_date&&m.min_date!=="N/A"&&<><span>·</span><span>moved {m.min_date}–{m.max_date}</span></>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Map View Component ──────────────────────────────────────────────
 function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
   const mapRef    = useRef(null);
@@ -375,6 +405,8 @@ function RepDashboard({repId,repName,onLogout}) {
   const [editingReqId, setEditingReqId] = useState(null);
   const [editReqName,  setEditReqName]  = useState("");
   const [reqBusy,      setReqBusy]       = useState(null);
+  const [zipOpen,      setZipOpen]       = useState({});
+  const toggleZip = (id) => setZipOpen(o=>({...o,[id]:!o[id]}));
   const [homeBase,  setHomeBase] = useState("");
   const [genCount,  setGenCount] = useState(100);
   const [customGen, setCustomGen]= useState("");
@@ -746,22 +778,7 @@ Or mix: 33596, Brandon, Valrico`}
                       </div>
                     )}
                     {f.start_address&&<div style={{fontSize:12,color:"#7A8FA6",marginTop:8}}>📍 Start: {f.start_address}</div>}
-                    {zm.length>0&&(
-                      <div style={{marginTop:8,background:"#0A1118",border:"1px solid #1E2D3D",
-                        borderRadius:8,padding:"8px 10px",display:"grid",gap:5}}>
-                        <div style={{fontSize:10,color:"#4A6075",textTransform:"uppercase",
-                          letterSpacing:"1px",fontWeight:700}}>By ZIP</div>
-                        {zm.map(([z,m])=>(
-                          <div key={z} style={{fontSize:12,color:"#7A8FA6",display:"flex",
-                            gap:6,flexWrap:"wrap",alignItems:"baseline"}}>
-                            <span style={{fontWeight:700,color:"#B0C4D4"}}>{z}{m.city?` · ${m.city}`:""}</span>
-                            <span>·</span>
-                            <span>{(m.count||0).toLocaleString()} homes</span>
-                            {m.min_date&&m.min_date!=="N/A"&&<><span>·</span><span>moved {m.min_date}–{m.max_date}</span></>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <ZipDetail zm={zm} open={zipOpen[req.id]} onToggle={(e)=>{e.stopPropagation();toggleZip(req.id);}}/>
                     {req.note&&<div style={{fontSize:13,color:"#7A8FA6",marginTop:8,fontStyle:"italic"}}>"{req.note}"</div>}
                   </div>
                   {req.status==="ready"&&(
@@ -829,22 +846,7 @@ Or mix: 33596, Brandon, Valrico`}
                         ))}
                       </div>
                     )}
-                    {zm.length>0&&(
-                      <div style={{marginTop:8,background:"#0A1118",border:"1px solid #1E2D3D",
-                        borderRadius:8,padding:"8px 10px",display:"grid",gap:5}}>
-                        <div style={{fontSize:10,color:"#4A6075",textTransform:"uppercase",
-                          letterSpacing:"1px",fontWeight:700}}>By ZIP</div>
-                        {zm.map(([z,m])=>(
-                          <div key={z} style={{fontSize:12,color:"#7A8FA6",display:"flex",
-                            gap:6,flexWrap:"wrap",alignItems:"baseline"}}>
-                            <span style={{fontWeight:700,color:"#B0C4D4"}}>{z}{m.city?` · ${m.city}`:""}</span>
-                            <span>·</span>
-                            <span>{(m.count||0).toLocaleString()} homes</span>
-                            {m.min_date&&m.min_date!=="N/A"&&<><span>·</span><span>moved {m.min_date}–{m.max_date}</span></>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <ZipDetail zm={zm} open={zipOpen[req.id]} onToggle={(e)=>{e.stopPropagation();toggleZip(req.id);}}/>
                   </div>
                   <div style={{width:22,height:22,borderRadius:"50%",marginTop:2,
                     background:sel?"#27AE60":"transparent",
