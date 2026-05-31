@@ -1770,6 +1770,48 @@ function AdminRouteDetail({route, onBack}) {
   );
 }
 
+function AdminRequestList({req, onBack}) {
+  const C={card:"#0D1520",border:"#1E2D3D"};
+  const rows=req.rows||[];
+  const fmtD=(iso)=>{ if(!iso) return ""; const p=iso.slice(0,10).split("-"); return p.length===3?`${p[1]}/${p[2]}/${p[0]}`:iso; };
+  return (
+    <div style={{display:"grid",gap:10}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:2}}>
+        <button onClick={onBack}
+          style={{background:"#1E2D3D",border:"none",borderRadius:10,color:"#B0C4D4",
+            fontWeight:700,fontSize:13,padding:"9px 14px",cursor:"pointer",flexShrink:0}}>← Back</button>
+        <div style={{minWidth:0}}>
+          <div style={{fontWeight:800,fontSize:17}}>{req.rep_name}'s list</div>
+          <div style={{fontSize:12,color:"#7A8FA6"}}>
+            {(req.zips||[]).join(", ")} · {rows.length.toLocaleString()} homes · in upload order
+          </div>
+        </div>
+      </div>
+      {rows.length===0?(
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
+          textAlign:"center",padding:28,color:"#4A6075"}}>No address data stored for this list.</div>
+      ):rows.map((s,i)=>(
+        <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,
+          borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:12,fontWeight:700,color:"#7A8FA6",background:"#1E2D3D",
+            borderRadius:6,padding:"3px 9px",flexShrink:0,minWidth:34,textAlign:"center"}}>{s.n??(i+1)}</span>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",
+              whiteSpace:"nowrap"}}>{s.address}{s.city?`, ${s.city}`:""}{s.state?`, ${s.state}`:""} {s.zip||""}</div>
+            <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+              {s.owner&&<span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>}
+              {s.date&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {fmtD(s.date)}</span></>}
+              {s.price>0&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                <span style={{fontSize:11,color:"#7A8FA6"}}>${Math.round(s.price).toLocaleString()}</span></>}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AdminDashboard({onLogout}) {
   const [requests, setRequests] = useState([]);
   const [routes,   setRoutes]   = useState([]);
@@ -1778,10 +1820,14 @@ function AdminDashboard({onLogout}) {
   const [uploading,setUploading]= useState(null);
   const [msgs,     setMsgs]     = useState({});
   const [adminRoute,setAdminRoute]= useState(null);
+  const [reqList,setReqList]= useState(null);
   const fileRefs = useRef({});
 
   const openRoute = async (id) => {
     try { const d=await get(`/route/${id}`); setAdminRoute(d); } catch{}
+  };
+  const openReqList = async (id) => {
+    try { const d=await get(`/admin/request/${id}/list`); setReqList(d); } catch{}
   };
 
   const load = async () => {
@@ -1888,6 +1934,8 @@ function AdminDashboard({onLogout}) {
 
         {adminRoute ? (
           <AdminRouteDetail route={adminRoute} onBack={()=>setAdminRoute(null)}/>
+        ) : reqList ? (
+          <AdminRequestList req={reqList} onBack={()=>setReqList(null)}/>
         ) : (<>
         {/* Tabs */}
         <div style={{display:"flex",background:"#0A1118",borderRadius:10,padding:4,
@@ -1989,7 +2037,8 @@ function AdminDashboard({onLogout}) {
             </h3>
             <div style={{display:"grid",gap:8}}>
               {fulfilled.map(req=>(
-                <div key={req.id} style={{...card,display:"flex",alignItems:"center",gap:12}}>
+                <div key={req.id} onClick={()=>openReqList(req.id)}
+                  style={{...card,display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                       <span style={{fontFamily:"monospace",fontSize:11,color:"#4A6075",
@@ -2004,6 +2053,7 @@ function AdminDashboard({onLogout}) {
                       ZIPs: {req.zips.join(", ")} · {req.row_count?.toLocaleString()} homes · {req.fulfilled}
                     </div>
                   </div>
+                  <span style={{fontSize:12,color:"#4A6075",flexShrink:0}}>View list ›</span>
                 </div>
               ))}
             </div>
