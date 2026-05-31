@@ -427,6 +427,14 @@ function RepDashboard({repId,repName,onLogout}) {
     catch(e){ alert("Couldn't rename: "+e.message); }
     setReqBusy(null);
   };
+  const deleteReq = async (req) => {
+    const nm=req.name||`ZIPs: ${req.zips.join(", ")}`;
+    if(!window.confirm(`Delete "${nm}"?\n\nIt will be archived — the admin can reactivate it if this was a mistake.`)) return;
+    setReqBusy(req.id);
+    try { await post(`/request/${req.id}/archive`,{}); await loadRequests(); }
+    catch(e){ alert("Couldn't delete: "+e.message); }
+    setReqBusy(null);
+  };
   const loadRoutes = async () => {
     try { const d=await get(`/rep/${repId}/routes`); setRoutes(d.routes); } catch{}
   };
@@ -780,17 +788,25 @@ State`}
                     <ZipDetail zm={zm} open={zipOpen[req.id]} onToggle={(e)=>{e.stopPropagation();toggleZip(req.id);}}/>
                     {req.note&&<div style={{fontSize:13,color:"#7A8FA6",marginTop:8,fontStyle:"italic"}}>"{req.note}"</div>}
                   </div>
-                  {req.status==="ready"&&(
-                    <button onClick={()=>{
-                      setSelReq(req);
-                      if(req.filters?.start_address) setHomeBase(req.filters.start_address);
-                      setTab("generate");
-                    }} style={{background:"linear-gradient(135deg,#27AE60,#1E8449)",border:"none",
-                      borderRadius:10,color:"white",fontWeight:700,fontSize:13,
-                      padding:"10px 16px",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-                      Generate →
+                  <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end",flexShrink:0}}>
+                    {req.status==="ready"&&(
+                      <button onClick={()=>{
+                        setSelReq(req);
+                        if(req.filters?.start_address) setHomeBase(req.filters.start_address);
+                        setTab("generate");
+                      }} style={{background:"linear-gradient(135deg,#27AE60,#1E8449)",border:"none",
+                        borderRadius:10,color:"white",fontWeight:700,fontSize:13,
+                        padding:"10px 16px",cursor:"pointer",whiteSpace:"nowrap"}}>
+                        Generate →
+                      </button>
+                    )}
+                    <button onClick={()=>deleteReq(req)} disabled={reqBusy===req.id} title="Delete this list"
+                      style={{background:"transparent",border:"1px solid #3A2530",borderRadius:9,
+                        color:"#C0392B",fontWeight:600,fontSize:12,padding:"7px 11px",
+                        cursor:"pointer",whiteSpace:"nowrap"}}>
+                      🗑 Delete
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
               );
@@ -1855,6 +1871,7 @@ function AdminDashboard({onLogout}) {
   const [msgs,     setMsgs]     = useState({});
   const [adminRoute,setAdminRoute]= useState(null);
   const [reqList,setReqList]= useState(null);
+  const [archived,setArchived]= useState([]);
   const fileRefs = useRef({});
 
   const openRoute = async (id) => {
@@ -1868,8 +1885,20 @@ function AdminDashboard({onLogout}) {
     try {
       const [dr,rr]=await Promise.all([get("/admin/requests"),get("/admin/routes")]);
       setRequests(dr.requests);setStats({total:dr.total,pending:dr.pending,ready:dr.ready});
+      setArchived(dr.archived||[]);
       setRoutes(rr.routes);
     } catch{}
+  };
+  const archiveReq=async(id)=>{
+    if(!window.confirm("Archive this list? It moves to the Archived section and is hidden from the rep. You can reactivate it later.")) return;
+    try{ await post(`/request/${id}/archive`,{}); await load(); }catch(e){ alert("Couldn't archive: "+e.message); }
+  };
+  const reactivateReq=async(id)=>{
+    try{ await post(`/request/${id}/unarchive`,{}); await load(); }catch(e){ alert("Couldn't reactivate: "+e.message); }
+  };
+  const deleteReqForever=async(id)=>{
+    if(!window.confirm("Permanently delete this list? This CANNOT be undone.")) return;
+    try{ await post(`/request/${id}/delete`,{}); await load(); }catch(e){ alert("Couldn't delete: "+e.message); }
   };
   useEffect(()=>{load();const i=setInterval(load,10000);return()=>clearInterval(i);},[]);
   useEffect(()=>{
@@ -2029,6 +2058,12 @@ function AdminDashboard({onLogout}) {
                       <span style={{fontSize:10,color:"#4A6075"}}>
                         Pull {req.filters?.home_count||"100"} records
                       </span>
+                      <button onClick={()=>archiveReq(req.id)} title="Delete / archive this request"
+                        style={{display:"block",marginTop:8,width:"100%",background:"transparent",
+                          border:"1px solid #3A2530",borderRadius:9,color:"#C0392B",fontWeight:600,
+                          fontSize:11,padding:"6px 10px",cursor:"pointer"}}>
+                        🗑 Archive
+                      </button>
                     </div>
                   </div>
                   {/* Search criteria */}
@@ -2087,7 +2122,50 @@ function AdminDashboard({onLogout}) {
                       ZIPs: {req.zips.join(", ")} · {req.row_count?.toLocaleString()} homes · {req.fulfilled}
                     </div>
                   </div>
-                  <span style={{fontSize:12,color:"#4A6075",flexShrink:0}}>View list ›</span>
+                  <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end",flexShrink:0}}>
+                    <span style={{fontSize:12,color:"#4A6075"}}>View list ›</span>
+                    <button onClick={(e)=>{e.stopPropagation();archiveReq(req.id);}} title="Delete / archive this list"
+                      style={{background:"transparent",border:"1px solid #3A2530",borderRadius:8,
+                        color:"#C0392B",fontWeight:600,fontSize:11,padding:"5px 9px",cursor:"pointer"}}>
+                      🗑 Archive
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>)}
+          {archived.length>0&&(<>
+            <h3 style={{fontSize:14,fontWeight:700,margin:"22px 0 12px",color:"#7A8FA6"}}>
+              🗄 Archived ({archived.length})
+            </h3>
+            <div style={{display:"grid",gap:8}}>
+              {archived.map(req=>(
+                <div key={req.id} style={{...card,display:"flex",alignItems:"center",gap:12,opacity:0.85,flexWrap:"wrap"}}>
+                  <div style={{flex:1,minWidth:180}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
+                      <span style={{fontFamily:"monospace",fontSize:11,color:"#4A6075",
+                        background:"#1E2D3D",padding:"2px 7px",borderRadius:4}}>#{req.id}</span>
+                      <span style={{fontWeight:700,fontSize:14}}>{req.rep_name}</span>
+                      <span style={{fontSize:10,color:"#7A8FA6",background:"#161E28",
+                        border:"1px solid #2C3D4E",borderRadius:20,padding:"2px 8px",fontWeight:600}}>Archived</span>
+                    </div>
+                    <div style={{fontSize:12,color:"#7A8FA6"}}>
+                      {req.name?req.name+" · ":""}ZIPs: {req.zips.join(", ")}
+                      {req.row_count?` · ${req.row_count.toLocaleString()} homes`:""}
+                    </div>
+                  </div>
+                  <div style={{display:"flex",gap:8,flexShrink:0}}>
+                    <button onClick={()=>reactivateReq(req.id)} title="Restore this list to the rep"
+                      style={{background:"#0D2B1A",border:"1px solid #27AE60",borderRadius:8,color:"#27AE60",
+                        fontWeight:700,fontSize:12,padding:"7px 11px",cursor:"pointer"}}>
+                      ♻ Reactivate
+                    </button>
+                    <button onClick={()=>deleteReqForever(req.id)} title="Permanently delete"
+                      style={{background:"transparent",border:"1px solid #3A2530",borderRadius:8,color:"#C0392B",
+                        fontWeight:600,fontSize:12,padding:"7px 11px",cursor:"pointer"}}>
+                      Delete forever
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
