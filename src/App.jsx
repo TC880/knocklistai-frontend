@@ -1878,7 +1878,7 @@ function AdminDashboard({onLogout}) {
         {/* Stats */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
           {[["Requests",stats.total||0,"white"],["⏳ Pending",stats.pending||0,"#F5A623"],
-            ["✓ Done",stats.ready||0,"#27AE60"],["🚗 Live",routes.length,"#4285F4"]].map(([l,v,c])=>(
+            ["✓ Done",stats.ready||0,"#27AE60"],["🚗 Live",liveRoutes.length,"#4285F4"]].map(([l,v,c])=>(
             <div key={l} style={{...card,textAlign:"center",padding:14}}>
               <div style={{fontSize:26,fontWeight:800,color:c}}>{v}</div>
               <div style={{fontSize:10,color:"#4A6075",marginTop:2}}>{l}</div>
