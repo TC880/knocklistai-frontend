@@ -290,6 +290,63 @@ function MapView({stops, tiers, currentStopNum, navPref, openEdit}) {
 // ══════════════════════════════════════════════════════════════════════
 // APP ROOT
 // ══════════════════════════════════════════════════════════════════════
+// ===== KL design foundation (Phase 1): font + toast + confirm modal =====
+const KLFONT = "'Plus Jakarta Sans',system-ui,-apple-system,sans-serif";
+function klInjectFX(){
+  if (typeof document==="undefined" || document.getElementById("kl-fx")) return;
+  if(!document.getElementById("kl-font")){
+    const l1=document.createElement("link");l1.rel="preconnect";l1.href="https://fonts.googleapis.com";document.head.appendChild(l1);
+    const l2=document.createElement("link");l2.rel="preconnect";l2.href="https://fonts.gstatic.com";l2.crossOrigin="";document.head.appendChild(l2);
+    const f=document.createElement("link");f.id="kl-font";f.rel="stylesheet";f.href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";document.head.appendChild(f);
+  }
+  const st=document.createElement("style");st.id="kl-fx";st.textContent=`
+    #kl-toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:99999;display:flex;flex-direction:column;gap:8px;width:340px;max-width:92vw;pointer-events:none}
+    .kl-toast{font-family:${KLFONT};background:#fff;border:1px solid #E6EAE2;border-radius:13px;padding:13px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 18px 44px -14px rgba(20,40,30,.34);animation:klin .4s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes klin{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+    .kl-toast.out{animation:klout .3s ease forwards}@keyframes klout{to{opacity:0;transform:translateY(12px)}}
+    .kl-toast .ki{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-weight:800;font-size:14px}
+    .kl-toast.ok .ki{background:#D8ECDF;color:#0E7344}.kl-toast.err .ki{background:#FBE4DF;color:#C0392B}.kl-toast.info .ki{background:#E1F0FA;color:#2E97D6}
+    .kl-toast .kt{font-size:13.5px;font-weight:700;line-height:1.3;color:#222A24}.kl-toast .kt small{display:block;font-weight:500;color:#5B675D;font-size:12px;margin-top:1px}
+    #kl-scrim{position:fixed;inset:0;background:rgba(22,32,27,.42);backdrop-filter:blur(4px);z-index:100000;display:none;align-items:center;justify-content:center;padding:26px}
+    #kl-scrim.open{display:flex}
+    .kl-modal{font-family:${KLFONT};background:#fff;border-radius:20px;padding:24px;width:100%;max-width:340px;box-shadow:0 30px 80px -20px rgba(20,40,30,.45);animation:klpop .32s cubic-bezier(.2,.9,.3,1.2) both}
+    @keyframes klpop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+    .kl-modal .km-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:15px;background:#EEF1EC}
+    .kl-modal.danger .km-ic{background:#FBE4DF}
+    .kl-modal h4{font-size:18px;font-weight:700;margin:0 0 7px;color:#222A24}.kl-modal p{font-size:13.5px;color:#5B675D;line-height:1.5;margin:0 0 20px}
+    .kl-modal .km-row{display:flex;gap:10px}.kl-modal .km-row button{flex:1;border-radius:12px;padding:13px;font:700 13.5px ${KLFONT};cursor:pointer;border:none;transition:transform .12s}.kl-modal .km-row button:active{transform:scale(.96)}
+    .km-cancel{background:#E0E5DA;color:#222A24}.km-ok{background:#15A05E;color:#fff}.km-ok.danger{background:#D24F3D}
+  `;document.head.appendChild(st);
+  const tw=document.createElement("div");tw.id="kl-toasts";document.body.appendChild(tw);
+  const sc=document.createElement("div");sc.id="kl-scrim";sc.innerHTML='<div class="kl-modal" id="kl-modal"></div>';document.body.appendChild(sc);
+  sc.addEventListener("click",(e)=>{ if(e.target===sc) klCloseModal(); });
+}
+function klToast(type,msg,sub){
+  klInjectFX();const w=document.getElementById("kl-toasts");if(!w)return;
+  const t=document.createElement("div");t.className="kl-toast "+(type||"info");
+  t.innerHTML='<div class="ki"></div><div class="kt"></div>';
+  t.querySelector(".ki").textContent=(type==="ok"?"✓":type==="err"?"!":"➜");
+  const kt=t.querySelector(".kt");kt.textContent=msg||"";
+  if(sub){const s=document.createElement("small");s.textContent=sub;kt.appendChild(s);}
+  w.appendChild(t);setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),300);},2600);
+}
+function klCloseModal(){const sc=document.getElementById("kl-scrim");if(sc)sc.classList.remove("open");}
+function klConfirm(opts){
+  opts=opts||{};klInjectFX();
+  const sc=document.getElementById("kl-scrim"),m=document.getElementById("kl-modal");
+  if(!sc||!m){ if(window.confirm(opts.body||opts.title||"Are you sure?")) opts.onConfirm&&opts.onConfirm(); return; }
+  const danger=!!opts.danger;m.className="kl-modal"+(danger?" danger":"");
+  m.innerHTML='<div class="km-ic"></div><h4></h4><p></p><div class="km-row"><button class="km-cancel"></button><button class="km-ok"></button></div>';
+  m.querySelector(".km-ic").textContent=opts.icon||(danger?"🗑":"❓");
+  m.querySelector("h4").textContent=opts.title||"Are you sure?";
+  m.querySelector("p").textContent=opts.body||"";
+  const cancel=m.querySelector(".km-cancel");cancel.textContent=opts.cancelLabel||"Cancel";
+  const ok=m.querySelector(".km-ok");ok.textContent=opts.confirmLabel||"Confirm";if(danger)ok.classList.add("danger");
+  cancel.onclick=klCloseModal;
+  ok.onclick=()=>{ klCloseModal(); opts.onConfirm&&opts.onConfirm(); };
+  sc.classList.add("open");
+}
+
 export default function App() {
   const [screen,  setScreen]  = useState(()=>{try{return localStorage.getItem("kl_screen")||"login";}catch{return "login";}});
   const [repName, setRepName] = useState(()=>{try{return localStorage.getItem("kl_repName")||"";}catch{return "";}});
@@ -297,6 +354,8 @@ export default function App() {
   const [pin,     setPin]     = useState("");
   const [loginErr,setLoginErr]= useState("");
   const [loginTab,setLoginTab]= useState("rep");
+
+  useEffect(()=>{ klInjectFX(); },[]);
 
   const loginRep = () => {
     if (!repName.trim()){setLoginErr("Enter your name");return;}
@@ -316,7 +375,7 @@ export default function App() {
 
   if (screen==="login") return (
     <div style={{minHeight:"100vh",background:"#080E14",display:"flex",alignItems:"center",
-      justifyContent:"center",fontFamily:"system-ui,sans-serif",padding:"20px"}}>
+      justifyContent:"center",fontFamily:KLFONT,padding:"20px"}}>
       <div style={{width:"100%",maxWidth:380}}>
         <div style={{textAlign:"center",marginBottom:32}}>
           <div style={{width:60,height:60,background:"linear-gradient(135deg,#F5A623,#E8820C)",
@@ -424,16 +483,17 @@ function RepDashboard({repId,repName,onLogout}) {
   const saveReqName = async (id) => {
     setReqBusy(id);
     try { await post(`/request/${id}/rename`,{name:editReqName}); setEditingReqId(null); await loadRequests(); }
-    catch(e){ alert("Couldn't rename: "+e.message); }
+    catch(e){ klToast("err","Couldn't rename",e.message); }
     setReqBusy(null);
   };
-  const deleteReq = async (req) => {
+  const deleteReq = (req) => {
     const nm=req.name||`ZIPs: ${req.zips.join(", ")}`;
-    if(!window.confirm(`Delete "${nm}"?\n\nIt will be archived — the admin can reactivate it if this was a mistake.`)) return;
-    setReqBusy(req.id);
-    try { await post(`/request/${req.id}/archive`,{}); await loadRequests(); }
-    catch(e){ alert("Couldn't delete: "+e.message); }
-    setReqBusy(null);
+    klConfirm({ title:`Delete "${nm}"?`, body:"It will be archived — the admin can reactivate it if this was a mistake.", danger:true, confirmLabel:"Archive", icon:"🗑", onConfirm: async()=>{
+      setReqBusy(req.id);
+      try { await post(`/request/${req.id}/archive`,{}); await loadRequests(); klToast("ok","List archived",nm); }
+      catch(e){ klToast("err","Couldn't delete",e.message); }
+      setReqBusy(null);
+    }});
   };
   const loadRoutes = async () => {
     try { const d=await get(`/rep/${repId}/routes`); setRoutes(d.routes); } catch{}
@@ -449,7 +509,7 @@ function RepDashboard({repId,repName,onLogout}) {
     try {
       await post(`/rep/${repId}/restore`, {address});
       await loadExcluded();
-    } catch(e){ alert("Couldn't restore: "+e.message); }
+    } catch(e){ klToast("err","Couldn't restore",e.message); }
     setExBusy(null);
   };
 
@@ -550,7 +610,7 @@ function RepDashboard({repId,repName,onLogout}) {
   ];
 
   return (
-    <div style={{minHeight:"100vh",background:C.bg,fontFamily:"system-ui,sans-serif",
+    <div style={{minHeight:"100vh",background:C.bg,fontFamily:KLFONT,
       color:"white",paddingBottom:80}}>
 
       {/* Header */}
@@ -1245,12 +1305,13 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
     setRowBusy(null);
   };
 
-  const deleteRoute = async (r) => {
-    if(!window.confirm(`Delete "${r.label}"? This permanently removes the route and all its stops. This can't be undone.`)) return;
-    setRowBusy(r.id);
-    try{ await post(`/route/${r.id}/delete`,{}); await loadRoutes(); }
-    catch(e){ alert("Couldn't delete: "+e.message); }
-    setRowBusy(null);
+  const deleteRoute = (r) => {
+    klConfirm({ title:`Delete "${r.label}"?`, body:"This permanently removes the route and all its stops. This can't be undone.", danger:true, confirmLabel:"Delete", icon:"🗑", onConfirm: async()=>{
+      setRowBusy(r.id);
+      try{ await post(`/route/${r.id}/delete`,{}); await loadRoutes(); klToast("ok","Route deleted",r.label); }
+      catch(e){ klToast("err","Couldn't delete",e.message); }
+      setRowBusy(null);
+    }});
   };
 
   if (!route) {
@@ -1889,16 +1950,18 @@ function AdminDashboard({onLogout}) {
       setRoutes(rr.routes);
     } catch{}
   };
-  const archiveReq=async(id)=>{
-    if(!window.confirm("Archive this list? It moves to the Archived section and is hidden from the rep. You can reactivate it later.")) return;
-    try{ await post(`/request/${id}/archive`,{}); await load(); }catch(e){ alert("Couldn't archive: "+e.message); }
+  const archiveReq=(id)=>{
+    klConfirm({ title:"Archive this list?", body:"It moves to the Archived section and is hidden from the rep. You can reactivate it later.", confirmLabel:"Archive", icon:"🗄", onConfirm: async()=>{
+      try{ await post(`/request/${id}/archive`,{}); await load(); klToast("ok","List archived"); }catch(e){ klToast("err","Couldn't archive",e.message); }
+    }});
   };
   const reactivateReq=async(id)=>{
-    try{ await post(`/request/${id}/unarchive`,{}); await load(); }catch(e){ alert("Couldn't reactivate: "+e.message); }
+    try{ await post(`/request/${id}/unarchive`,{}); await load(); klToast("ok","List reactivated"); }catch(e){ klToast("err","Couldn't reactivate",e.message); }
   };
-  const deleteReqForever=async(id)=>{
-    if(!window.confirm("Permanently delete this list? This CANNOT be undone.")) return;
-    try{ await post(`/request/${id}/delete`,{}); await load(); }catch(e){ alert("Couldn't delete: "+e.message); }
+  const deleteReqForever=(id)=>{
+    klConfirm({ title:"Permanently delete this list?", body:"This CANNOT be undone.", danger:true, confirmLabel:"Delete forever", icon:"⚠️", onConfirm: async()=>{
+      try{ await post(`/request/${id}/delete`,{}); await load(); klToast("ok","Deleted permanently"); }catch(e){ klToast("err","Couldn't delete",e.message); }
+    }});
   };
   useEffect(()=>{load();const i=setInterval(load,10000);return()=>clearInterval(i);},[]);
   useEffect(()=>{
@@ -1962,7 +2025,7 @@ function AdminDashboard({onLogout}) {
   const card={background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:18};
 
   return (
-    <div style={{minHeight:"100vh",background:C.bg,fontFamily:"system-ui,sans-serif",color:"white",paddingBottom:80}}>
+    <div style={{minHeight:"100vh",background:C.bg,fontFamily:KLFONT,color:"white",paddingBottom:80}}>
       {/* Header */}
       <div style={{background:"#0A1118",borderBottom:`1px solid ${C.border}`,padding:"0 16px",
         height:52,display:"flex",alignItems:"center",justifyContent:"space-between",
