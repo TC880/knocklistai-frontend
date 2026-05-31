@@ -581,13 +581,13 @@ function RepDashboard({repId,repName,onLogout}) {
             <div style={card}>
               <span style={lbl}>Location</span>
               <textarea value={zips} onChange={e=>setZips(e.target.value)}
-                placeholder={`ZIP codes: 33596, 33511
-Towns: Valrico, Brandon, Riverview
-Counties: Hillsborough County
-Or mix: 33596, Brandon, Valrico`}
+                placeholder={`ZIP codes
+Towns
+County
+State`}
                 style={{...inp,height:100,resize:"none",lineHeight:1.6,fontFamily:"inherit"}}/>
               <p style={{margin:"6px 0 0",fontSize:12,color:"#4A6075"}}>
-                Enter any combination of ZIP codes, city names, or county names
+                Enter any combination of ZIP codes, towns, county, or state
               </p>
             </div>
 
@@ -683,7 +683,7 @@ Or mix: 33596, Brandon, Valrico`}
             <div style={card}>
               <span style={lbl}>Your Starting Address</span>
               <input value={startAddr} onChange={e=>setStartAddr(e.target.value)}
-                placeholder="e.g. 2003 River Crossing Dr, Valrico, FL 33596" style={inp}/>
+                placeholder="e.g. 123 Main St, City, ST 00000" style={inp}/>
               <p style={{margin:"8px 0 0",fontSize:12,color:"#4A6075"}}>
                 Route will be optimized closest-to-closest from here
               </p>
@@ -731,7 +731,6 @@ Or mix: 33596, Brandon, Valrico`}
               if(f.owner_occupied&&f.owner_occupied!=="Any") chips.push(`Owner: ${f.owner_occupied}`);
               if(f.price_min||f.price_max) chips.push(`$${f.price_min||"0"}–${f.price_max||"∞"}`);
               if(f.sale_date_from||f.sale_date_to) chips.push(`Moved ${f.sale_date_from||"…"} → ${f.sale_date_to||"…"}`);
-              if(f.home_count) chips.push(`${f.home_count} requested`);
               const zm=(req.zip_meta&&typeof req.zip_meta==="object")?Object.entries(req.zip_meta):[];
               const editing=editingReqId===req.id;
               const displayName=req.name||`ZIPs: ${req.zips.join(", ")}`;
@@ -821,7 +820,6 @@ Or mix: 33596, Brandon, Valrico`}
                 if(f.owner_occupied&&f.owner_occupied!=="Any") chips.push(`Owner: ${f.owner_occupied}`);
                 if(f.price_min||f.price_max) chips.push(`$${f.price_min||"0"}–${f.price_max||"∞"}`);
                 if(f.sale_date_from||f.sale_date_to) chips.push(`Moved ${f.sale_date_from||"…"} → ${f.sale_date_to||"…"}`);
-                if(f.home_count) chips.push(`${f.home_count} requested`);
                 const zm=(req.zip_meta&&typeof req.zip_meta==="object")?Object.entries(req.zip_meta):[];
                 const sel=selReq?.id===req.id;
                 return (
