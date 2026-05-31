@@ -1773,7 +1773,16 @@ function AdminRouteDetail({route, onBack}) {
 function AdminRequestList({req, onBack}) {
   const C={card:"#0D1520",border:"#1E2D3D"};
   const rows=req.rows||[];
+  const [open,setOpen]=useState(null);
   const fmtD=(iso)=>{ if(!iso) return ""; const p=iso.slice(0,10).split("-"); return p.length===3?`${p[1]}/${p[2]}/${p[0]}`:iso; };
+  const Field=({label,value})=>(
+    <div style={{display:"flex",justifyContent:"space-between",gap:12,padding:"5px 0",
+      borderTop:`1px solid ${C.border}`}}>
+      <span style={{fontSize:12,color:"#4A6075"}}>{label}</span>
+      <span style={{fontSize:12,color:value?"#D6E2ED":"#3A4D5E",fontWeight:value?600:400,
+        textAlign:"right"}}>{value||"—"}</span>
+    </div>
+  );
   return (
     <div style={{display:"grid",gap:10}}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:2}}>
@@ -1790,24 +1799,49 @@ function AdminRequestList({req, onBack}) {
       {rows.length===0?(
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,
           textAlign:"center",padding:28,color:"#4A6075"}}>No address data stored for this list.</div>
-      ):rows.map((s,i)=>(
-        <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,
-          borderRadius:12,padding:"11px 15px",display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:12,fontWeight:700,color:"#7A8FA6",background:"#1E2D3D",
-            borderRadius:6,padding:"3px 9px",flexShrink:0,minWidth:34,textAlign:"center"}}>{s.n??(i+1)}</span>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",
-              whiteSpace:"nowrap"}}>{s.address}{s.city?`, ${s.city}`:""}{s.state?`, ${s.state}`:""} {s.zip||""}</div>
-            <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
-              {s.owner&&<span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>}
-              {s.date&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
-                <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {fmtD(s.date)}</span></>}
-              {s.price>0&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
-                <span style={{fontSize:11,color:"#7A8FA6"}}>${Math.round(s.price).toLocaleString()}</span></>}
+      ):rows.map((s,i)=>{
+        const isOpen=open===i;
+        return (
+        <div key={i} onClick={()=>setOpen(isOpen?null:i)}
+          style={{background:C.card,border:`1px solid ${isOpen?"#2C4156":C.border}`,
+          borderRadius:12,padding:"11px 15px",cursor:"pointer"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#7A8FA6",background:"#1E2D3D",
+              borderRadius:6,padding:"3px 9px",flexShrink:0,minWidth:34,textAlign:"center"}}>{s.n??(i+1)}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",
+                whiteSpace:"nowrap"}}>{s.address}</div>
+              <div style={{display:"flex",gap:8,marginTop:2,flexWrap:"wrap"}}>
+                {s.owner&&<span style={{fontSize:11,color:"#4A6075"}}>{s.owner}</span>}
+                {s.date&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                  <span style={{fontSize:11,color:"#7A8FA6"}}>📅 {fmtD(s.date)}</span></>}
+                {s.price>0&&<><span style={{fontSize:11,color:"#4A6075"}}>·</span>
+                  <span style={{fontSize:11,color:"#7A8FA6"}}>${Math.round(s.price).toLocaleString()}</span></>}
+              </div>
             </div>
+            <span style={{fontSize:12,color:"#4A6075",flexShrink:0}}>{isOpen?"▾":"›"}</span>
           </div>
+          {isOpen&&(
+            <div style={{marginTop:10,paddingLeft:46}}>
+              <Field label="Address" value={s.address}/>
+              <Field label="Homeowner" value={s.owner}/>
+              <Field label="City" value={s.city}/>
+              <Field label="State" value={s.state}/>
+              <Field label="ZIP" value={s.zip}/>
+              <Field label="Sale date" value={s.date?fmtD(s.date):""}/>
+              <Field label="Sale price" value={s.price>0?`$${Math.round(s.price).toLocaleString()}`:""}/>
+              <Field label="Coordinates" value={(s.lat&&s.lon)?`${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}`:""}/>
+              {s.lat&&s.lon&&(
+                <a href={`https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}`}
+                  target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+                  style={{display:"inline-block",marginTop:8,fontSize:12,color:"#4285F4",
+                    fontWeight:600,textDecoration:"none"}}>🗺 Open in Maps</a>
+              )}
+            </div>
+          )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
