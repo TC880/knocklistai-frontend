@@ -1141,6 +1141,8 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
   const [editingId, setEditingId] = useState(null);
   const [editLabel, setEditLabel] = useState("");
   const [rowBusy,   setRowBusy]   = useState(null);
+  const [winOpen,   setWinOpen]   = useState({});
+  const toggleWin = (id) => setWinOpen(o=>({...o,[id]:!o[id]}));
 
   const setNav=(p)=>{setNavPref(p);try{localStorage.setItem("navPref",p);}catch{}};
 
@@ -1281,33 +1283,41 @@ function DriveMode({repId,driveRoute,setDriveRoute,routes,loadRoutes,loadDriveRo
           ):(<>
             <div style={{flex:1,cursor:"pointer",minWidth:0}} onClick={()=>loadDriveRoute(r.id)}>
               <div style={{fontWeight:700,fontSize:14}}>{r.label}</div>
-              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:showCount?7:0}}>
+              <div style={{fontSize:12,color:"#4A6075",marginTop:2,marginBottom:0}}>
                 {r.completed}/{r.total} done · {r.pct}%{r.created_at?` · ${r.created_at}`:""}
               </div>
-              {hasMw ? (winLabels.length>0&&(
-                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {winLabels.map((w,i)=>{
-                    const label=typeof w==="string"?w:(w.label||"");
-                    const range=(w&&typeof w==="object")?fmtRange(w.from,w.to):"";
-                    return (
-                      <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
-                        border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
-                        📅 {label}{range?` · ${range}`:""}
-                      </span>
-                    );
-                  })}
+              {showCount>0&&(
+                <div style={{marginTop:7}}>
+                  <button onClick={(e)=>{e.stopPropagation();toggleWin(r.id);}}
+                    style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",
+                      color:"#7A8FA6",fontSize:10,fontWeight:700,textTransform:"uppercase",
+                      letterSpacing:"1px",cursor:"pointer",padding:0}}>
+                    <span style={{display:"inline-block",transition:"transform 0.15s",
+                      transform:winOpen[r.id]?"rotate(90deg)":"none",fontSize:12,lineHeight:1}}>▸</span>
+                    {hasMw?`Move-in windows (${winLabels.length})`:`Tiers (${tcfg.length})`}
+                  </button>
+                  {winOpen[r.id]&&(
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6}}>
+                      {hasMw ? winLabels.map((w,i)=>{
+                        const label=typeof w==="string"?w:(w.label||"");
+                        const range=(w&&typeof w==="object")?fmtRange(w.from,w.to):"";
+                        return (
+                          <span key={i} style={{fontSize:11,color:"#B0C4D4",background:"#0A1118",
+                            border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                            📅 {label}{range?` · ${range}`:""}
+                          </span>
+                        );
+                      }) : tcfg.map((t,i)=>(
+                        <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,
+                          color:"#B0C4D4",background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
+                          <span style={{width:8,height:8,borderRadius:"50%",background:t.color||"#7A8FA6",flexShrink:0}}/>
+                          {t.name}{t.range?` · ${t.range}`:""}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )) : (tcfg.length>0&&(
-                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {tcfg.map((t,i)=>(
-                    <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,
-                      color:"#B0C4D4",background:"#0A1118",border:"1px solid #1E2D3D",borderRadius:6,padding:"3px 8px"}}>
-                      <span style={{width:8,height:8,borderRadius:"50%",background:t.color||"#7A8FA6",flexShrink:0}}/>
-                      {t.name}{t.range?` · ${t.range}`:""}
-                    </span>
-                  ))}
-                </div>
-              ))}
+              )}
             </div>
             <button onClick={()=>{setEditingId(r.id);setEditLabel(r.label);}} title="Rename"
               style={{background:"transparent",border:"none",color:"#7A8FA6",fontSize:16,
